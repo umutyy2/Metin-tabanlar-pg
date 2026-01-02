@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sisli Orman - Bilgi Paneli Güncellemesi</title>
+    <title>Sisli Orman Günlükleri</title>
     <style>
         :root { --gold: #f1c40f; --bg: #0d0d0d; --panel: #1a1a1a; --text: #e0e0e0; --red: #e74c3c; --blue: #3498db; --green: #2ecc71; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); font-family: 'Georgia', serif; margin: 0; overflow: hidden; }
         
         .screen { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
         #setup-screen { display: flex; background: #000; z-index: 5000; }
         #game-screen { background: var(--bg); z-index: 10; display: flex; flex-direction: column; }
-        #overlay { background: rgba(0,0,0,0.96); z-index: 2000; }
+        #overlay { background: rgba(0,0,0,0.98); z-index: 2000; }
 
-        .box { background: var(--panel); padding: 25px; border: 2px solid var(--gold); border-radius: 12px; width: 330px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        
+        .box { background: var(--panel); padding: 25px; border: 2px solid var(--gold); border-radius: 15px; width: 320px; text-align: center; }
         #log-window { flex: 1; width: 100%; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
-        .log-entry { margin-bottom: 8px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 4px solid var(--gold); font-size: 14px; animation: slideIn 0.2s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .log-entry { margin-bottom: 10px; padding: 12px; background: rgba(255,255,255,0.02); border-left: 4px solid var(--gold); font-size: 14px; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .btn { background: #222; color: #fff; border: 1px solid #444; padding: 12px; margin: 5px; border-radius: 8px; cursor: pointer; width: 100%; font-family: inherit; transition: 0.2s; box-sizing: border-box; font-weight: bold; }
-        .btn:hover:not(.locked) { border-color: var(--gold); color: var(--gold); }
+        .btn { background: #222; color: #fff; border: 1px solid #444; padding: 12px; margin: 5px; border-radius: 8px; cursor: pointer; width: 100%; font-family: inherit; transition: 0.3s; box-sizing: border-box; }
+        .btn:hover:not(.locked) { border-color: var(--gold); background: #333; }
         .locked { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
         
-        #explore-btn { width: 100%; height: 75px; background: var(--blue); border: none; color: white; font-weight: bold; font-size: 16px; position: fixed; bottom: 0; z-index: 500; display: none; cursor: pointer; }
-        #menu-trigger { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; z-index: 1000; color: #000; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3); }
+        #explore-btn { width: 100%; height: 75px; background: var(--blue); border: none; color: white; font-weight: bold; font-size: 18px; position: fixed; bottom: 0; z-index: 500; display: none; }
+        #menu-trigger { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; z-index: 1000; color: #000; }
 
         #battle-hud { background: #1a0505; border: 2px solid var(--red); padding: 15px; width: 90%; margin: 10px auto; border-radius: 10px; display: none; }
-        .bar { height: 10px; background: #333; border-radius: 5px; margin: 5px 0; overflow: hidden; }
+        .bar { height: 10px; background: #333; border-radius: 5px; margin: 8px 0; overflow: hidden; }
         .bar-fill { height: 100%; background: var(--red); width: 100%; transition: 0.4s; }
+        #skill-bar { display: flex; gap: 5px; margin-top: 10px; }
 
-        .stat-line { display: flex; justify-content: space-between; margin: 10px 0; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .stat-row { display: flex; justify-content: space-between; margin: 8px 0; border-bottom: 1px solid #333; padding-bottom: 4px; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; box-sizing: border-box; }
     </style>
 </head>
@@ -38,27 +38,31 @@
 
     <div id="setup-screen" class="screen">
         <div class="box">
-            <h2 style="color:var(--gold)">KADERİNİ ÇİZ</h2>
-            <input type="text" id="p-name" placeholder="Kahraman Adı">
+            <h2 style="color:var(--gold)">KADERİNİ SEÇ</h2>
+            <input type="text" id="p-name" placeholder="Adın ne, yolcu?">
+            <select id="p-gender"><option value="Erkek">Erkek</option><option value="Kadın">Kadın</option></select>
             <select id="p-class">
                 <option value="Savaşçı">Savaşçı</option>
                 <option value="Büyücü">Büyücü</option>
                 <option value="Avcı">Avcı</option>
                 <option value="Şifacı">Şifacı</option>
             </select>
-            <button class="btn" style="background:var(--gold); color:#000;" onclick="startGame()">BAŞLA</button>
+            <button class="btn" style="background:var(--gold); color:#000;" onclick="startGame()">UYANIŞI BAŞLAT</button>
         </div>
     </div>
 
     <div id="game-screen" class="screen">
         <div id="battle-hud">
-            <div id="m-name" style="color:var(--red); font-weight:bold;">Düşman</div>
+            <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                <span id="m-name" style="color:var(--red);">Düşman</span>
+                <span id="p-hp-view" style="color:var(--green);">Can: 100</span>
+            </div>
             <div class="bar"><div id="m-hp-bar" class="bar-fill"></div></div>
-            <div id="skills-container" style="display:flex; gap:5px;"></div>
+            <div id="skill-bar"></div>
         </div>
         <div id="log-window"></div>
         <div id="menu-trigger" onclick="toggleMenu('main')">📜</div>
-        <button id="explore-btn" onclick="explore()">ORMANDA İLERLE</button>
+        <button id="explore-btn" onclick="explore()">SİSLERİN İÇİNE GİR</button>
     </div>
 
     <div id="overlay" class="screen" onclick="if(event.target==this) closeOverlay()">
@@ -67,107 +71,103 @@
 
 <script>
     let p = { 
-        name: "", class: "", lvl: 1, xp: 0, nextXp: 100, 
-        hp: 100, maxHp: 100, atk: 15, weapon: null,
-        inv: [] 
+        name: "", gender: "", class: "", lvl: 1, xp: 0, nextXp: 100, 
+        hp: 100, maxHp: 100, atk: 15, weapon: null, inv: [] 
     };
 
     const classData = {
-        "Savaşçı": { w: "Ağır Kılıç", basic: "Yumruk", power: 25 },
-        "Büyücü": { w: "Kristal Asa", basic: "Kıvılcım", power: 25 },
-        "Avcı": { w: "Kemik Yay", basic: "Tekme", power: 25 },
-        "Şifacı": { w: "Kutsal Dal", basic: "Işık", power: 20 }
+        "Savaşçı": { w: "Paslı Kılıç", basic: "Yumruk", story: "kılıcının ağırlığını" },
+        "Büyücü": { w: "Çatlak Değnek", basic: "Enerji", story: "kitapların fısıltısını" },
+        "Avcı": { w: "Kırık Yay", basic: "Tekme", story: "rüzgarın yönünü" },
+        "Şifacı": { w: "Eski Asâ", basic: "Işık Şamarı", story: "duaların gücünü" }
     };
 
-    const monsters = [
-        { n: "Sis Sıçanı", min: 1, max: 3, hp: 50, atk: 8, xp: 45 },
-        { n: "Gölge Kurdu", min: 3, max: 6, hp: 120, atk: 18, xp: 120 },
-        { n: "Karanlık Şövalye", min: 6, max: 9, hp: 300, atk: 35, xp: 450 },
-        { n: "KADİM EJDERHA", min: 10, max: 10, hp: 1000, atk: 75, xp: 2500 }
+    const monsterDB = [
+        { n: "Kör Sıçan", min: 1, max: 4, hp: 45, atk: 7, xp: 50 },
+        { n: "Sis Kurdu", min: 3, max: 7, hp: 110, atk: 18, xp: 140 },
+        { n: "Gölge Ejderi", min: 8, max: 10, hp: 900, atk: 70, xp: 2000 }
     ];
 
-    let currentEnemy = null;
+    let enemy = null;
 
     function startGame() {
-        p.name = document.getElementById('p-name').value || "Yolcu";
+        p.name = document.getElementById('p-name').value || "Yabancı";
+        p.gender = document.getElementById('p-gender').value;
         p.class = document.getElementById('p-class').value;
+
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('game-screen').style.display = 'flex';
         document.getElementById('explore-btn').style.display = 'block';
         document.getElementById('menu-trigger').style.display = 'flex';
-        addLog(`Hoş geldin ${p.name}. Macera başlıyor...`);
+
+        addLog(`Elas ateşin başında sana bakıyor: "${p.name}, bir ${p.class} ${p.gender === 'Erkek' ? 'bey' : 'hanım'} olarak uyanman kaderin bir parçası. Hatırlıyor musun ${classData[p.class].story}?"`);
     }
 
     function explore() {
-        if(currentEnemy) return;
-        let pool = monsters.filter(m => p.lvl >= m.min);
-        currentEnemy = { ...pool[Math.floor(Math.random()*pool.length)] };
-        currentEnemy.mHp = currentEnemy.hp;
+        if(enemy) return;
+        let pool = monsterDB.filter(m => p.lvl >= m.min);
+        enemy = { ...pool[Math.floor(Math.random()*pool.length)] };
+        enemy.maxH = enemy.hp;
         document.getElementById('battle-hud').style.display = 'block';
         document.getElementById('explore-btn').style.display = 'none';
-        updateUI();
-        addLog(`Karşına bir <b>${currentEnemy.n}</b> çıktı!`);
+        updateBattleUI();
+        addLog(`Sisten bir <b>${enemy.n}</b> belirdi!`);
     }
 
-    function attack(mult) {
-        let dmg = Math.floor(p.atk * mult);
-        currentEnemy.hp -= dmg;
-        addLog(`${currentEnemy.n} yaratığına ${dmg} vurdun.`);
-        
-        if(currentEnemy.hp <= 0) {
-            addLog(`<span style="color:var(--green)">ZAFERSizindir!</span>`);
-            addLog(`<span style="color:var(--gold)">KAZANÇ: +${currentEnemy.xp} XP</span>`);
-            gainXp(currentEnemy.xp);
+    function playerHit(mult, type) {
+        if(!enemy) return;
+        if(type === 'heal') {
+            let h = Math.floor(p.maxHp * 0.3); p.hp = Math.min(p.maxHp, p.hp + h);
+            addLog(`Yaralarını sardın (+${h} Can).`);
+        } else {
+            let d = Math.floor(p.atk * mult); enemy.hp -= d;
+            addLog(`${enemy.n} yaratığına ${d} hasar verdin.`);
+        }
+
+        if(enemy.hp <= 0) {
+            addLog(`<span style="color:var(--gold)">ZAFER! +${enemy.xp} XP KAZANDIN.</span>`);
+            gainXp(enemy.xp);
             endBattle();
         } else {
-            p.hp -= currentEnemy.atk;
-            addLog(`${currentEnemy.n} sana vurdu: -${currentEnemy.atk} Can.`);
-            if(p.hp <= 0) { 
-                addLog(`<span style="color:var(--red)">Yenildin ve geri çekildin.</span>`); 
-                p.hp = p.maxHp; 
-                endBattle(); 
-            }
+            p.hp -= enemy.atk;
+            addLog(`${enemy.n} sana vurdu! (-${enemy.atk} Can)`);
+            if(p.hp <= 0) { addLog("Yenildin..."); p.hp = p.maxHp; endBattle(); }
         }
-        updateUI();
+        updateBattleUI();
     }
 
     function gainXp(amt) {
         p.xp += amt;
         if(p.xp >= p.nextXp) {
-            let overflow = p.xp - p.nextXp;
-            p.lvl++; p.xp = overflow; 
-            p.nextXp = Math.floor(p.nextXp * 1.5); 
-            p.atk += 8; p.maxHp += 20; p.hp = p.maxHp;
+            p.lvl++; p.xp = 0; p.nextXp += 120; p.atk += 10; p.maxHp += 30; p.hp = p.maxHp;
             addLog(`<b style="color:var(--gold)">SEVİYE ATLADIN: ${p.lvl}!</b>`);
-            if(p.lvl === 2) { 
-                p.inv.push(classData[p.class].w); 
-                addLog(`<i>Yerden bir eşya aldın: ${classData[p.class].w}</i>`); 
+            if(p.lvl === 2) { p.inv.push(classData[p.class].w); addLog(`Çantana ${classData[p.class].w} eklendi.`); }
+        }
+    }
+
+    function endBattle() { enemy = null; document.getElementById('battle-hud').style.display = 'none'; document.getElementById('explore-btn').style.display = 'block'; }
+
+    function updateBattleUI() {
+        if(enemy) {
+            document.getElementById('m-name').innerText = enemy.n;
+            document.getElementById('m-hp-bar').style.width = (enemy.hp/enemy.maxH*100) + "%";
+            let btnName = p.weapon ? "Saldır" : classData[p.class].basic;
+            let html = `<button class="btn" onclick="playerHit(1, 'dmg')">${btnName}</button>`;
+            if(p.lvl >= 5) {
+                let sName = p.class === "Şifacı" ? "Şifa" : "Özel Güç";
+                let sType = p.class === "Şifacı" ? "heal" : "dmg";
+                html += `<button class="btn" style="border-color:var(--blue)" onclick="playerHit(2.5, '${sType}')">${sName}</button>`;
             }
+            document.getElementById('skill-bar').innerHTML = html;
         }
-    }
-
-    function endBattle() {
-        currentEnemy = null;
-        document.getElementById('battle-hud').style.display = 'none';
-        document.getElementById('explore-btn').style.display = 'block';
-    }
-
-    function updateUI() {
-        if(currentEnemy) {
-            document.getElementById('m-name').innerText = currentEnemy.n;
-            document.getElementById('m-hp-bar').style.width = (currentEnemy.hp/currentEnemy.mHp*100) + "%";
-            let btnText = p.weapon ? "Silahla Saldır" : classData[p.class].basic;
-            document.getElementById('skills-container').innerHTML = `<button class="btn" onclick="attack(1)">${btnText}</button>`;
-            if(p.lvl >= 5) document.getElementById('skills-container').innerHTML += `<button class="btn" style="color:var(--blue)" onclick="attack(2.5)">ÖZEL GÜÇ</button>`;
-        }
+        document.getElementById('p-hp-view').innerText = `Can: ${p.hp}/${p.maxHp}`;
     }
 
     function addLog(msg) {
         const win = document.getElementById('log-window');
-        const entry = document.createElement('div');
-        entry.className = 'log-entry';
-        entry.innerHTML = `> ${msg}`;
-        win.appendChild(entry);
+        const e = document.createElement('div');
+        e.className = 'log-entry'; e.innerHTML = `> ${msg}`;
+        win.appendChild(e);
         if(win.childNodes.length > 6) win.removeChild(win.childNodes[0]);
     }
 
@@ -176,46 +176,32 @@
         document.getElementById('overlay').style.display = 'flex';
         
         if(type === 'main') {
-            content.innerHTML = `
-                <h2 style="color:var(--gold)">📜 MENÜ</h2>
+            content.innerHTML = `<h2 style="color:var(--gold)">MENÜ</h2>
                 <button class="btn" onclick="toggleMenu('profile')">👤 PROFİL</button>
-                <button class="btn ${p.lvl < 2 ? 'locked' : ''}" onclick="${p.lvl >= 2 ? "toggleMenu('bag')" : ""}">🎒 ÇANTA</button>
-                <button class="btn ${p.lvl < 3 ? 'locked' : ''}" onclick="${p.lvl >= 3 ? "toggleMenu('equip')" : ""}">⚔️ EKİPMAN</button>
-                <button class="btn" style="color:var(--red)" onclick="closeOverlay()">KAPAT</button>`;
+                <button class="btn ${p.lvl < 2 ? 'locked' : ''}" onclick="${p.lvl >= 2 ? "toggleMenu('bag')" : ""}">🎒 ÇANTA (2)</button>
+                <button class="btn ${p.lvl < 3 ? 'locked' : ''}" onclick="${p.lvl >= 3 ? "toggleMenu('equip')" : ""}">⚔️ EKİPMAN (3)</button>
+                <button class="btn" onclick="closeOverlay()">KAPAT</button>`;
         } else if(type === 'profile') {
             let progress = Math.floor((p.xp / p.nextXp) * 100);
-            content.innerHTML = `
-                <h3 style="color:var(--gold)">👤 KARAKTER BİLGİSİ</h3>
-                <div class="stat-line"><span>İsim:</span> <span>${p.name}</span></div>
-                <div class="stat-line"><span>Sınıf:</span> <span>${p.class}</span></div>
-                <div class="stat-line"><span>Seviye:</span> <span>${p.lvl}</span></div>
-                <div class="stat-line"><span>Saldırı:</span> <span>${p.atk}</span></div>
-                <div class="stat-line"><span>Can:</span> <span>${p.hp}/${p.maxHp}</span></div>
-                <div style="margin-top:15px; text-align:left; font-size:12px;">XP: ${p.xp} / ${p.nextXp} (%${progress})</div>
+            content.innerHTML = `<h3>${p.name} (${p.gender})</h3>
+                <div class="stat-row"><span>Seviye:</span><span>${p.lvl}</span></div>
+                <div class="stat-row"><span>Saldırı:</span><span>${p.atk}</span></div>
+                <div style="text-align:left; font-size:12px; margin-top:10px;">XP: ${p.xp} / ${p.nextXp} (%${progress})</div>
                 <div class="bar" style="background:#222"><div class="bar-fill" style="width:${progress}%; background:var(--blue)"></div></div>
                 <button class="btn" onclick="toggleMenu('main')">GERİ</button>`;
         } else if(type === 'bag') {
-            content.innerHTML = `<h3>🎒 ÇANTA</h3><p>${p.inv.join("<br>") || "Boş"}</p><button class="btn" onclick="toggleMenu('main')">GERİ</button>`;
+            content.innerHTML = `<h3>ÇANTA</h3><p>${p.inv.join("<br>") || "Boş"}</p><button class="btn" onclick="toggleMenu('main')">GERİ</button>`;
         } else if(type === 'equip') {
             let item = classData[p.class].w;
-            let status = p.weapon ? `<span style="color:var(--green)">Kuşanıldı</span>` : `<span style="color:var(--red)">Kuşanılmadı</span>`;
-            content.innerHTML = `<h3>⚔️ EKİPMAN</h3>
-                <div class="stat-line"><span>Silah:</span> <span>${item}</span></div>
-                <div class="stat-line"><span>Durum:</span> <span>${status}</span></div>
-                <p style="font-size:11px; color:#888;">(+${classData[p.class].power} Hasar Verir)</p>
-                ${!p.weapon ? `<button class="btn" onclick="equipItem()">KUŞAN</button>` : ''}
+            content.innerHTML = `<h3>EKİPMAN</h3><p>Durum: ${p.weapon ? 'Kuşanıldı' : 'Boş'}</p>
+                ${!p.weapon ? `<button class="btn" onclick="equip()">[${item}] KUŞAN</button>` : ''}
                 <button class="btn" onclick="toggleMenu('main')">GERİ</button>`;
         }
     }
 
-    function equipItem() {
-        let item = classData[p.class].w;
-        if(p.inv.includes(item)) {
-            p.weapon = item; 
-            p.atk += classData[p.class].power;
-            addLog(`${item} kuşanıldı. Gücün büyük ölçüde arttı!`);
-            toggleMenu('equip');
-        }
+    function equip() {
+        let itm = classData[p.class].w;
+        if(p.inv.includes(itm)) { p.weapon = itm; p.atk += 25; addLog(`${itm} kuşandın!`); toggleMenu('equip'); }
     }
 
     function closeOverlay() { document.getElementById('overlay').style.display = 'none'; }
