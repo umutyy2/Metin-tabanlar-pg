@@ -8,43 +8,43 @@
 </head>
 <body>
 
-<div id="main-menu">
-  <h1>METİN TABANLI RPG</h1>
-  <button onclick="startGame()">Oyunu Başlat</button>
-  <button onclick="openSettings()">Seçenekler</button>
-  <button onclick="openAbout()">Hakkında</button>
+<div id="mainMenu" class="screen">
+  <h1 id="title">METİN TABANLI RPG</h1>
+  <button id="btnStart" onclick="startGame()">Oyunu Başlat</button>
+  <button id="btnSettings" onclick="openSettings()">Seçenekler</button>
+  <button id="btnAbout" onclick="openAbout()">Hakkında</button>
 </div>
 
-<div id="settings-menu" class="hidden">
-  <h2>Ayarlar</h2>
+<div id="settingsMenu" class="screen hidden">
+  <h2 id="settingsTitle">Ayarlar</h2>
 
-  <label>Dil</label>
+  <label id="langLabel">Dil</label>
   <select id="language">
     <option value="tr">Türkçe</option>
     <option value="en">English</option>
   </select>
 
   <label>Ana Ses</label>
-  <input type="range" min="0" max="100" value="80" id="masterVolume">
+  <input type="range" min="0" max="100" value="80">
 
   <label>Müzik Sesi</label>
-  <input type="range" min="0" max="100" value="70" id="musicVolume">
+  <input type="range" min="0" max="100" value="70">
 
   <label>Efekt Sesi</label>
-  <input type="range" min="0" max="100" value="80" id="sfxVolume">
+  <input type="range" min="0" max="100" value="80">
 
   <label>
     <input type="checkbox" id="vibration"> Titreşim
   </label>
 
-  <button onclick="saveSettings()">Kaydet</button>
-  <button onclick="closeSettings()">Geri</button>
+  <button id="btnSave" onclick="saveSettings()">Kaydet</button>
+  <button id="btnBack1" onclick="closeSettings()">Geri</button>
 </div>
 
-<div id="about-menu" class="hidden">
-  <h2>Hakkında</h2>
-  <p>Metin tabanlı hikâye odaklı RPG oyunu.</p>
-  <button onclick="closeAbout()">Geri</button>
+<div id="aboutMenu" class="screen hidden">
+  <h2 id="aboutTitle">Hakkında</h2>
+  <p id="aboutText">Metin tabanlı hikâye RPG oyunu.</p>
+  <button id="btnBack2" onclick="closeAbout()">Geri</button>
 </div>
 
 <script src="main.js"></script>
@@ -55,16 +55,31 @@ body {
   background: #0f172a;
   color: #e5e7eb;
   font-family: Arial, sans-serif;
-  text-align: center;
   margin: 0;
-  padding: 0;
+}
+
+.screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden {
+  display: none;
 }
 
 button {
   width: 80%;
   max-width: 300px;
   padding: 12px;
-  margin: 10px;
+  margin: 8px;
   font-size: 18px;
   border: none;
   border-radius: 8px;
@@ -76,52 +91,90 @@ button:hover {
   background: #1d4ed8;
 }
 
-.hidden {
-  display: none;
-}
-
-#main-menu,
-#settings-menu,
-#about-menu {
-  margin-top: 60px;
-}
-
 label {
   display: block;
-  margin-top: 15px;
+  margin-top: 12px;
 }
 
-function startGame() {
-  alert("Oyun yakında başlayacak.");
-}
+const text = {
+  tr: {
+    title: "METİN TABANLI RPG",
+    start: "Oyunu Başlat",
+    settings: "Seçenekler",
+    about: "Hakkında",
+    settingsTitle: "Ayarlar",
+    aboutTitle: "Hakkında",
+    aboutText: "Metin tabanlı hikâye RPG oyunu.",
+    back: "Geri",
+    save: "Kaydet"
+  },
+  en: {
+    title: "TEXT RPG",
+    start: "Start Game",
+    settings: "Options",
+    about: "About",
+    settingsTitle: "Settings",
+    aboutTitle: "About",
+    aboutText: "Story based text RPG game.",
+    back: "Back",
+    save: "Save"
+  }
+};
 
-function openSettings() {
-  document.getElementById("main-menu").classList.add("hidden");
-  document.getElementById("settings-menu").classList.remove("hidden");
-}
+let settings = {
+  language: "tr"
+};
 
-function closeSettings() {
-  document.getElementById("settings-menu").classList.add("hidden");
-  document.getElementById("main-menu").classList.remove("hidden");
-}
-
-function openAbout() {
-  document.getElementById("main-menu").classList.add("hidden");
-  document.getElementById("about-menu").classList.remove("hidden");
-}
-
-function closeAbout() {
-  document.getElementById("about-menu").classList.add("hidden");
-  document.getElementById("main-menu").classList.remove("hidden");
+function loadSettings() {
+  const saved = localStorage.getItem("gameSettings");
+  if (saved) {
+    settings = JSON.parse(saved);
+  }
+  document.getElementById("language").value = settings.language;
+  applyLanguage();
 }
 
 function saveSettings() {
-  const settings = {
-    language: document.getElementById("language").value,
-    masterVolume: document.getElementById("masterVolume").value,
-    musicVolume: document.getElementById("musicVolume").value,
-    sfxVolume: document.getElementById("sfxVolume").value,
-    vibration: document.getElementById("vibration").checked
-  };
+  settings.language = document.getElementById("language").value;
   localStorage.setItem("gameSettings", JSON.stringify(settings));
 }
+
+function applyLanguage() {
+  const t = text[settings.language];
+
+  document.getElementById("title").innerText = t.title;
+  document.getElementById("btnStart").innerText = t.start;
+  document.getElementById("btnSettings").innerText = t.settings;
+  document.getElementById("btnAbout").innerText = t.about;
+  document.getElementById("settingsTitle").innerText = t.settingsTitle;
+  document.getElementById("aboutTitle").innerText = t.aboutTitle;
+  document.getElementById("aboutText").innerText = t.aboutText;
+  document.getElementById("btnBack1").innerText = t.back;
+  document.getElementById("btnBack2").innerText = t.back;
+  document.getElementById("btnSave").innerText = t.save;
+}
+
+function startGame() {}
+
+function openSettings() {
+  mainMenu.classList.add("hidden");
+  settingsMenu.classList.remove("hidden");
+}
+
+function closeSettings() {
+  saveSettings();
+  settingsMenu.classList.add("hidden");
+  mainMenu.classList.remove("hidden");
+}
+
+function openAbout() {
+  mainMenu.classList.add("hidden");
+  aboutMenu.classList.remove("hidden");
+}
+
+function closeAbout() {
+  aboutMenu.classList.add("hidden");
+  mainMenu.classList.remove("hidden");
+}
+
+window.onload = loadSettings;
