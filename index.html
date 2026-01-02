@@ -1,180 +1,156 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Metin Tabanlı RPG</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metin Tabanlı RPG</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0e0e0e;
+  color: #fff;
+}
+.screen {
+  display: none;
+  padding: 20px;
+}
+.screen.active {
+  display: block;
+}
+button {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  font-size: 16px;
+  background: #1f1f1f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+}
+button:active {
+  background: #333;
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+}
+</style>
 </head>
 <body>
 
-<div id="mainMenu" class="screen">
-  <h1 id="title">METİN TABANLI RPG</h1>
-  <button id="btnStart" onclick="startGame()">Oyunu Başlat</button>
-  <button id="btnSettings" onclick="openSettings()">Seçenekler</button>
-  <button id="btnAbout" onclick="openAbout()">Hakkında</button>
+<div id="menu" class="screen active">
+  <h1 id="title">Metin Tabanlı RPG</h1>
+  <button onclick="startGame()" id="startBtn">Oyunu Başlat</button>
+  <button onclick="openSettings()" id="settingsBtn">Seçenekler</button>
+  <button onclick="openAbout()" id="aboutBtn">Hakkında</button>
 </div>
 
-<div id="settingsMenu" class="screen hidden">
-  <h2 id="settingsTitle">Ayarlar</h2>
+<div id="game" class="screen">
+  <div class="topbar">
+    <button onclick="goMenu()">←</button>
+    <button onclick="openSettings()">⚙️</button>
+  </div>
+  <p id="storyText">
+    Soğuk bir rüzgar yüzüne çarpıyor. Önünde bilinmeyen bir yol uzanıyor.
+  </p>
+</div>
 
+<div id="settings" class="screen">
+  <h2 id="settingsTitle">Ayarlar</h2>
   <label id="langLabel">Dil</label>
-  <select id="language">
+  <select onchange="changeLang(this.value)">
     <option value="tr">Türkçe</option>
     <option value="en">English</option>
   </select>
-
-  <label>Ana Ses</label>
-  <input type="range" min="0" max="100" value="80">
-
-  <label>Müzik Sesi</label>
-  <input type="range" min="0" max="100" value="70">
-
-  <label>Efekt Sesi</label>
-  <input type="range" min="0" max="100" value="80">
-
-  <label>
-    <input type="checkbox" id="vibration"> Titreşim
-  </label>
-
-  <button id="btnSave" onclick="saveSettings()">Kaydet</button>
-  <button id="btnBack1" onclick="closeSettings()">Geri</button>
+  <button onclick="goMenu()" id="backBtn">Geri</button>
 </div>
 
-<div id="aboutMenu" class="screen hidden">
+<div id="about" class="screen">
   <h2 id="aboutTitle">Hakkında</h2>
-  <p id="aboutText">Metin tabanlı hikâye RPG oyunu.</p>
-  <button id="btnBack2" onclick="closeAbout()">Geri</button>
+  <p id="aboutText">
+    Bu oyun metin tabanlı bir RPG projesidir.
+  </p>
+  <button onclick="goMenu()" id="backBtn2">Geri</button>
 </div>
 
-<script src="main.js"></script>
-</body>
-</html>
+<script>
+let currentLang = "tr";
 
-body {
-  background: #0f172a;
-  color: #e5e7eb;
-  font-family: Arial, sans-serif;
-  margin: 0;
-}
-
-.screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #0f172a;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.hidden {
-  display: none;
-}
-
-button {
-  width: 80%;
-  max-width: 300px;
-  padding: 12px;
-  margin: 8px;
-  font-size: 18px;
-  border: none;
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
-}
-
-button:hover {
-  background: #1d4ed8;
-}
-
-label {
-  display: block;
-  margin-top: 12px;
-}
-
-const text = {
+const texts = {
   tr: {
-    title: "METİN TABANLI RPG",
+    title: "Metin Tabanlı RPG",
     start: "Oyunu Başlat",
     settings: "Seçenekler",
     about: "Hakkında",
     settingsTitle: "Ayarlar",
-    aboutTitle: "Hakkında",
-    aboutText: "Metin tabanlı hikâye RPG oyunu.",
+    lang: "Dil",
     back: "Geri",
-    save: "Kaydet"
+    aboutText: "Bu oyun metin tabanlı bir RPG projesidir.",
+    story: "Soğuk bir rüzgar yüzüne çarpıyor. Önünde bilinmeyen bir yol uzanıyor."
   },
   en: {
-    title: "TEXT RPG",
+    title: "Text Based RPG",
     start: "Start Game",
     settings: "Options",
     about: "About",
     settingsTitle: "Settings",
-    aboutTitle: "About",
-    aboutText: "Story based text RPG game.",
+    lang: "Language",
     back: "Back",
-    save: "Save"
+    aboutText: "This is a text based RPG project.",
+    story: "A cold wind hits your face. An unknown road lies ahead."
   }
 };
 
-let settings = {
-  language: "tr"
-};
-
-function loadSettings() {
-  const saved = localStorage.getItem("gameSettings");
-  if (saved) {
-    settings = JSON.parse(saved);
-  }
-  document.getElementById("language").value = settings.language;
-  applyLanguage();
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-function saveSettings() {
-  settings.language = document.getElementById("language").value;
-  localStorage.setItem("gameSettings", JSON.stringify(settings));
+function startGame() {
+  showScreen("game");
 }
-
-function applyLanguage() {
-  const t = text[settings.language];
-
-  document.getElementById("title").innerText = t.title;
-  document.getElementById("btnStart").innerText = t.start;
-  document.getElementById("btnSettings").innerText = t.settings;
-  document.getElementById("btnAbout").innerText = t.about;
-  document.getElementById("settingsTitle").innerText = t.settingsTitle;
-  document.getElementById("aboutTitle").innerText = t.aboutTitle;
-  document.getElementById("aboutText").innerText = t.aboutText;
-  document.getElementById("btnBack1").innerText = t.back;
-  document.getElementById("btnBack2").innerText = t.back;
-  document.getElementById("btnSave").innerText = t.save;
-}
-
-function startGame() {}
 
 function openSettings() {
-  mainMenu.classList.add("hidden");
-  settingsMenu.classList.remove("hidden");
-}
-
-function closeSettings() {
-  saveSettings();
-  settingsMenu.classList.add("hidden");
-  mainMenu.classList.remove("hidden");
+  showScreen("settings");
 }
 
 function openAbout() {
-  mainMenu.classList.add("hidden");
-  aboutMenu.classList.remove("hidden");
+  showScreen("about");
 }
 
-function closeAbout() {
-  aboutMenu.classList.add("hidden");
-  mainMenu.classList.remove("hidden");
+function goMenu() {
+  showScreen("menu");
 }
 
-window.onload = loadSettings;
+function changeLang(lang) {
+  currentLang = lang;
+  applyLang();
+}
+
+function applyLang() {
+  const t = texts[currentLang];
+  document.getElementById("title").innerText = t.title;
+  document.getElementById("startBtn").innerText = t.start;
+  document.getElementById("settingsBtn").innerText = t.settings;
+  document.getElementById("aboutBtn").innerText = t.about;
+  document.getElementById("settingsTitle").innerText = t.settingsTitle;
+  document.getElementById("langLabel").innerText = t.lang;
+  document.getElementById("backBtn").innerText = t.back;
+  document.getElementById("backBtn2").innerText = t.back;
+  document.getElementById("aboutText").innerText = t.aboutText;
+  document.getElementById("storyText").innerText = t.story;
+}
+
+applyLang();
+</script>
+
+</body>
+</html>
