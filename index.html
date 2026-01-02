@@ -62,10 +62,19 @@ label {
   <div class="topbar">
     <button onclick="goMenu()">←</button>
     <button onclick="openSettings()">⚙️</button>
+    <button onclick="toggleGameMenu()">📖</button>
   </div>
   <p id="storyText">
     Soğuk bir rüzgar yüzüne çarpıyor. Önünde bilinmeyen bir yol uzanıyor.
   </p>
+  <div id="gameMenu" style="display:none;">
+    <button onclick="openInventory()">Çanta</button>
+    <button onclick="openEquipment()">Ekipman</button>
+    <button onclick="openPets()">Evcil Hayvanlar</button>
+    <button onclick="openMounts()">Binekler</button>
+    <button onclick="openSkillMenu()">Yetenekler</button>
+    <button onclick="openHeroLog()">Kahraman Günlüğü</button>
+  </div>
 </div>
 
 <div id="settings" class="screen">
@@ -146,6 +155,7 @@ function showScreen(id) {
 function startGame() {
   playUI("start");
   showScreen("game");
+  startRegion();
 }
 
 function openSettings() {
@@ -227,29 +237,101 @@ function loadSettings() {
 }
 loadSettings();
 
-function playUI(action) {
-  console.log("UI Ses çalıyor:", action);
+function playUI(action) { console.log("UI Ses çalıyor:", action); }
+function playAmbient(type) { console.log("Ambiyans Ses çalıyor:", type); }
+function playSkillSound(skillId) { console.log("Yetenek sesi çalıyor:", skillId); }
+function playWeaponSound(weaponId) { console.log("Silah sesi çalıyor:", weaponId); }
+function playMonsterSound(monsterId, direction) { console.log("Canavar sesi çalıyor:", monsterId, direction); }
+function playNPCSound(npcId, action) { console.log("NPC sesi çalıyor:", npcId, action); }
+
+let player = {
+  name: "",
+  gender: null,
+  class: null,
+  level: 1,
+  experience: 0,
+  skills: [],
+  unlockedMenus: { inventory: false, equipment: false, pets: false, mounts: false, heroLog: false }
+};
+
+const classes = {
+  Savasci: ["Normal Saldırı","Güçlü Darbe","Kalkan Savunması","Hızlı Hamle","Yerevurma","Ölümcül Vuruş","Çifte Saldırı","Savunma Düşmanı","Savaş Ruhu","Efsanevi Darbe"],
+  Buyucu: ["Normal Saldırı","Ateş Topu","Buz Mızrağı","Şimşek","Rüzgar Dalgası","Büyü Kalkanı","Zihin Kontrolü","Element Patlaması","Mana Patlaması","Efsanevi Büyü"],
+  Sifaci: ["Normal Saldırı","Hafif İyileştir","Güçlü İyileştir","Koruma","Can Yenileme","Grup İyileştir","Tılsım Patlaması","Enerji Dalgası","Hayat Patlaması","Efsanevi İyileştirme"],
+  Hirsiz: ["Normal Saldırı","Hızlı Kes","Arkadan Vuruş","Hileli Tuzak","Gölge Adımı","Çifte Darbe","Hırsızlık Ustası","Kilit Kırma","Para Çalma","Efsanevi Hırsızlık"]
+};
+
+let skillsUnlockLevels = [5,10,15,20,25,30,35,40,45,50];
+
+function unlockSkills(level){
+  for(let c in classes){
+    player.skills[c] = [];
+    classes[c].forEach((skill,i)=>{
+      if(level>=skillsUnlockLevels[i]){
+        player.skills[c].push(skill);
+      }
+    });
+  }
 }
 
-function playAmbient(type) {
-  console.log("Ambiyans Ses çalıyor:", type);
+let region = {
+  name: "Yeşil Vadi",
+  minLevel:1,
+  maxLevel:10,
+  villages: ["Kavak Köyü","Çınar Köyü","Ardıç Köyü"],
+  city: "Altınşehir",
+  npcs: [],
+  monsters: [],
+  quests: []
+};
+
+function startRegion(){
+  document.getElementById("storyText").innerText = `Burası ${region.name}. Yolculuğun başlıyor.`;
+  generateNPCs();
+  generateMonsters();
+  unlockMenus();
 }
 
-function playSkillSound(skillId) {
-  console.log("Yetenek sesi çalıyor:", skillId);
+function generateNPCs(){
+  region.npcs = [];
+  const namesMale = ["Ali","Mehmet","Can","Emir"];
+  const namesFemale = ["Ayşe","Elif","Zeynep","Derya"];
+  region.villages.forEach(v=>{
+    for(let i=0;i<3;i++){
+      region.npcs.push({name:namesMale[i],gender:"male",village:v});
+      region.npcs.push({name:namesFemale[i],gender:"female",village:v});
+    }
+  });
+  region.npcs.push({name:"Fatma",gender:"female",village:region.city});
+  region.npcs.push({name:"Ahmet",gender:"male",village:region.city});
 }
 
-function playWeaponSound(weaponId) {
-  console.log("Silah sesi çalıyor:", weaponId);
+function generateMonsters(){
+  region.monsters = [];
+  for(let lvl=1;lvl<=10;lvl++){
+    region.monsters.push({name:"Canavar"+lvl,level:lvl,dropGold:lvl*2});
+  }
 }
 
-function playMonsterSound(monsterId, direction) {
-  console.log("Canavar sesi çalıyor:", monsterId, direction);
+function unlockMenus(){
+  if(player.level>=2) player.unlockedMenus.inventory=true;
+  if(player.level>=3) player.unlockedMenus.equipment=true;
+  if(player.level>=4) player.unlockedMenus.pets=true;
+  if(player.level>=5) player.unlockedMenus.mounts=true;
+  if(player.level>=6) player.unlockedMenus.heroLog=true;
 }
 
-function playNPCSound(npcId, action) {
-  console.log("NPC sesi çalıyor:", npcId, action);
+function toggleGameMenu(){
+  const menu=document.getElementById("gameMenu");
+  menu.style.display = menu.style.display==="none"?"block":"none";
 }
+
+function openInventory(){alert("Çanta açıldı!");}
+function openEquipment(){alert("Ekipman menüsü açıldı!");}
+function openPets(){alert("Evcil Hayvanlar açıldı!");}
+function openMounts(){alert("Binekler açıldı!");}
+function openSkillMenu(){alert("Yetenekler açıldı!");}
+function openHeroLog(){alert("Kahraman Günlüğü açıldı!");}
 </script>
 
 </body>
