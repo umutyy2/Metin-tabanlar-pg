@@ -2,140 +2,217 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Sisli Orman Günlükleri - Kararlı Sürüm</title>
+    <title>Sisli Orman Günlükleri - Bölüm 1</title>
     <style>
         :root { --gold: #f1c40f; --bg: #0d0d0d; --panel: #1a1a1a; --text: #e0e0e0; --blue: #3498db; --red: #e74c3c; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); font-family: 'Georgia', serif; margin: 0; overflow: hidden; }
         
         /* EKRAN KATMANLARI */
         .screen { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        #setup-screen { display: flex; background: #000; z-index: 1000; } /* Sadece başlangıçta açık */
+        #setup-screen { display: flex; background: #000; z-index: 1000; }
         #game-screen { background: var(--bg); z-index: 10; }
         #menu-overlay { background: rgba(0,0,0,0.95); z-index: 2000; }
 
-        /* GÖRSEL ÖGELER */
-        .box { background: var(--panel); padding: 25px; border: 2px solid var(--gold); border-radius: 12px; width: 300px; text-align: center; }
-        #log-window { flex: 1; width: 100%; padding: 20px; overflow-y: auto; box-sizing: border-box; background: linear-gradient(to bottom, #111, #000); }
-        .log-entry { margin-bottom: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-left: 3px solid var(--gold); font-size: 14px; }
-        
-        /* BUTONLAR */
-        .btn { background: #222; color: #fff; border: 1px solid #444; padding: 12px; margin: 5px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 15px; }
-        .btn:hover { border-color: var(--gold); }
-        .btn-main { background: var(--gold); color: #000; font-weight: bold; border: none; }
-        .btn-locked { opacity: 0.3; cursor: not-allowed; }
-        
-        #explore-btn { width: 100%; height: 60px; background: var(--blue); border: none; color: white; font-weight: bold; font-size: 16px; cursor: pointer; }
-        #menu-btn { position: fixed; bottom: 75px; right: 20px; width: 55px; height: 55px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; border: 2px solid #000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        /* SAVAŞ PANELİ */
+        #battle-hud { background: #1a0505; border: 2px solid var(--red); padding: 15px; width: 90%; margin: 10px auto; border-radius: 10px; display: none; box-shadow: 0 0 15px rgba(231, 76, 60, 0.2); }
+        .bar { height: 8px; background: #333; border-radius: 4px; margin: 5px 0; overflow: hidden; }
+        .bar-fill { height: 100%; background: #2ecc71; width: 100%; transition: 0.4s; }
 
-        input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 4px; border: 1px solid #444; background: #222; color: #fff; box-sizing: border-box; }
+        /* LOG VE HİKAYE AKIŞI */
+        #log-window { flex: 1; width: 100%; padding: 25px; overflow-y: auto; box-sizing: border-box; }
+        .log-entry { margin-bottom: 15px; padding: 12px; background: rgba(255,255,255,0.02); border-left: 4px solid var(--gold); line-height: 1.6; font-style: italic; animation: fadeIn 0.5s; }
+        
+        .btn { background: #222; color: #fff; border: 1px solid #444; padding: 12px; margin: 5px; border-radius: 6px; cursor: pointer; width: 100%; font-family: inherit; transition: 0.2s; }
+        .btn:hover { border-color: var(--gold); background: #2a2a2a; }
+        #explore-btn { width: 100%; height: 70px; background: var(--blue); border: none; color: white; font-weight: bold; font-size: 18px; text-transform: uppercase; letter-spacing: 2px; }
+        #menu-btn { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; z-index: 1000; border: 2px solid #000; }
+
+        input, select { width: 85%; padding: 12px; margin: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
 
     <div id="setup-screen" class="screen">
-        <div class="box">
-            <h2 style="color:var(--gold)">RUHUNU UYANDIR</h2>
-            <input type="text" id="p-name" placeholder="Karakter Adı">
-            <select id="p-gender">
-                <option value="Erkek">Erkek</option>
-                <option value="Kadın">Kadın</option>
-            </select>
-            <select id="p-class">
-                <option value="Savaşçı">Savaşçı</option>
-                <option value="Büyücü">Büyücü</option>
-                <option value="Avcı">Avcı</option>
-            </select>
-            <button class="btn btn-main" onclick="startGame()">MACERAYA BAŞLA</button>
+        <div style="background:var(--panel); padding:40px; border:2px solid var(--gold); border-radius:20px; text-align:center; width: 320px;">
+            <h2 style="color:var(--gold); margin-bottom: 20px;">RUHUNU UYANDIR</h2>
+            <input type="text" id="p-name" placeholder="Adın nedir, yolcu?">
+            <select id="p-gender"><option value="Erkek">Erkek</option><option value="Kadın">Kadın</option></select>
+            <select id="p-class"><option value="savasci">Savaşçı</option><option value="buyucu">Büyücü</option><option value="avci">Avcı</option></select>
+            <button class="btn" style="background:var(--gold); color:#000; font-weight:bold; border:none; margin-top: 10px;" onclick="startGame()">BAŞLA</button>
         </div>
     </div>
 
     <div id="game-screen" class="screen">
         <div id="log-window"></div>
+        
+        <div id="battle-hud">
+            <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom: 5px;">
+                <span id="m-name" style="color:var(--red); font-weight:bold;">Canavar</span>
+                <span id="m-hp-text">50/50</span>
+            </div>
+            <div class="bar"><div id="m-hp-bar" class="bar-fill" style="background:var(--red)"></div></div>
+            <button class="btn" style="background:var(--red); border:none; font-weight:bold;" onclick="attack()">KILIÇ SAVUR!</button>
+        </div>
+
         <div id="menu-btn" onclick="openMenu()">📜</div>
-        <button id="explore-btn" onclick="explore()">ORMANI KEŞFET</button>
+        <button id="explore-btn" onclick="explore()">ORMANIN DERİNLİKLERİNE İLERLE</button>
     </div>
 
     <div id="menu-overlay" class="screen">
-        <div id="menu-content" class="box">
-            </div>
+        <div id="menu-content" style="background:var(--panel); padding:30px; border:2px solid var(--gold); border-radius:15px; width:300px; text-align:center;"></div>
     </div>
 
 <script>
-    let player = { name: "", gender: "", class: "", lvl: 1, myMounts: [] };
+    // --- OYUNCU VE CANAVAR VERİLERİ ---
+    let player = { 
+        name: "", gender: "", class: "", lvl: 1, xp: 0, nextXp: 100, 
+        hp: 100, maxHp: 100, atk: 15, gold: 0
+    };
 
+    const monsterDB = [
+        { name: "Yavru Kurt", minLvl: 1, hp: 40, atk: 8, xp: 45 },
+        { name: "Zehirli Örümcek", minLvl: 1, hp: 35, atk: 12, xp: 50 },
+        { name: "Bozuk Zırhlı İskelet", minLvl: 4, hp: 80, atk: 15, xp: 80 },
+        { name: "Gölge Hayaleti", minLvl: 4, hp: 70, atk: 20, xp: 90 },
+        { name: "Orman Trolü", minLvl: 7, hp: 150, atk: 25, xp: 150 },
+        { name: "Bataklık Cadısı", minLvl: 8, hp: 120, atk: 35, xp: 180 },
+        { name: "Gölge Ejderi Yavrusu", minLvl: 10, hp: 400, atk: 50, xp: 500 }
+    ];
+
+    let currentEnemy = null;
+
+    // --- OYUN AKIŞI ---
     function startGame() {
-        const name = document.getElementById('p-name').value;
-        if(!name) return alert("Lütfen isim girin!");
-
-        player.name = name;
+        const nameIn = document.getElementById('p-name').value;
+        if(!nameIn) return alert("Kaderin bir isme ihtiyacı var!");
+        
+        player.name = nameIn;
         player.gender = document.getElementById('p-gender').value;
         player.class = document.getElementById('p-class').value;
 
-        // Ekranları değiştir
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('game-screen').style.display = 'flex';
+        document.getElementById('menu-btn').style.display = 'flex';
         
-        addLog(`Sislere bürünmüş bir ormanda uyandın, ${player.name}.`);
-        addLog(`Elas: "Sonunda uyandın ${player.gender === 'Erkek' ? 'delikanlı' : 'genç kız'}. Kendine dikkat et."`);
-    }
-
-    function addLog(msg) {
-        const logWindow = document.getElementById('log-window');
-        logWindow.innerHTML += `<div class="log-entry">> ${msg}</div>`;
-        logWindow.scrollTop = logWindow.scrollHeight;
+        addLog(`Gözlerini açtığında karşında Elas'ın derin çizgilerle dolu yüzünü gördün. "${player.gender === 'Erkek' ? 'Delikanlı' : 'Genç kız'}, Sisli Orman'a hoş geldin. Kolundaki o mühür... Seni ya krallığa taşıyacak ya da bu topraklara gömecek."`);
     }
 
     function explore() {
-        addLog("Ormanda ilerliyorsun... Çalıların arasından bir Gölge Kurdu fırladı!");
+        if(currentEnemy) return;
+
+        // SEVİYE ALGORİTMASI: Sadece oyuncunun seviyesine uygun canavarlar gelir
+        let possibleMonsters = monsterDB.filter(m => player.lvl >= m.minLvl);
+        let m = possibleMonsters[Math.floor(Math.random() * possibleMonsters.length)];
+        
+        currentEnemy = { ...m, maxHp: m.hp };
+
+        document.getElementById('explore-btn').style.display = 'none';
+        document.getElementById('battle-hud').style.display = 'block';
+        updateUI();
+        
+        addLog(`Sık dalların arasından bir hırıltı yükseldi. Bir <b>${currentEnemy.name}</b> yolunu kesti! Gözlerinde kadim bir nefret var.`);
     }
 
-    // --- MENÜ SİSTEMİ (TEMİZLEME GARANTİLİ) ---
+    function attack() {
+        if(!currentEnemy) return;
+        
+        // Oyuncunun Hamlesi
+        currentEnemy.hp -= player.atk;
+        addLog(`Kılıcını savurdun, ${currentEnemy.name} acıyla geriledi!`);
+
+        if(currentEnemy.hp <= 0) {
+            addLog(`${currentEnemy.name} yere yığılırken ruhu sislere karıştı. Güçlendiğini hissediyorsun.`);
+            gainXp(currentEnemy.xp);
+            endBattle();
+        } else {
+            // Canavarın Hamlesi
+            player.hp -= currentEnemy.atk;
+            addLog(`${currentEnemy.name} karşı atağa geçti! Kaburgalarında keskin bir acı hissettin.`);
+            if(player.hp <= 0) {
+                addLog("Görüşün bulanıklaşıyor... Elas seni sislere bırakmadı, kampa geri taşıdı.");
+                player.hp = Math.floor(player.maxHp * 0.5); // Cezalı dirilme
+                endBattle();
+            }
+        }
+        updateUI();
+    }
+
+    function gainXp(amt) {
+        player.xp += amt;
+        if(player.xp >= player.nextXp) {
+            player.lvl++;
+            player.xp = 0;
+            player.nextXp += 60;
+            player.atk += 6;
+            player.maxHp += 25;
+            player.hp = player.maxHp;
+            addLog(`<b style="color:var(--gold)">KOLUNDAKİ MÜHÜR PARLIYOR! Seviye ${player.lvl} oldun. Gücün katlandı.</b>`);
+            
+            if(player.lvl === 5) addLog("<i>Zihninde bir kapı aralandı... İlk özel yeteneğin uyanmak üzere.</i>");
+        }
+    }
+
+    function endBattle() {
+        currentEnemy = null;
+        document.getElementById('battle-hud').style.display = 'none';
+        document.getElementById('explore-btn').style.display = 'block';
+    }
+
+    function updateUI() {
+        if(currentEnemy) {
+            document.getElementById('m-name').innerText = currentEnemy.name;
+            document.getElementById('m-hp-text').innerText = `${currentEnemy.hp}/${currentEnemy.maxHp}`;
+            document.getElementById('m-hp-bar').style.width = `${(currentEnemy.hp/currentEnemy.maxHp)*100}%`;
+        }
+    }
+
+    function addLog(msg) {
+        const win = document.getElementById('log-window');
+        win.innerHTML += `<div class="log-entry">${msg}</div>`;
+        win.scrollTop = win.scrollHeight;
+    }
+
+    // --- MENÜ SİSTEMİ ---
     function openMenu() {
         const overlay = document.getElementById('menu-overlay');
-        const content = document.getElementById('menu-content');
         overlay.style.display = 'flex';
+        renderMainMenu();
+    }
 
-        content.innerHTML = `
+    function renderMainMenu() {
+        document.getElementById('menu-content').innerHTML = `
             <h2 style="color:var(--gold)">ANA MENÜ</h2>
             <button class="btn" onclick="showProfile()">👤 PROFİL</button>
-            <button class="btn ${player.lvl < 10 ? 'btn-locked' : ''}" onclick="showMounts()">🐎 BİNEK (LV 10)</button>
-            <button class="btn btn-main" style="background:#c0392b; color:white;" onclick="closeMenu()">❌ KAPAT</button>
+            <button class="btn" onclick="showMounts()">🐎 BİNEK PANELİ</button>
+            <button class="btn" style="background:var(--red); margin-top:15px;" onclick="closeMenu()">❌ KAPAT</button>
         `;
     }
 
     function showProfile() {
         document.getElementById('menu-content').innerHTML = `
-            <h2 style="color:var(--gold)">PROFİL</h2>
-            <div style="text-align:left; margin-bottom:15px;">
+            <h2 style="color:var(--gold)">👤 KAHRAMAN</h2>
+            <div style="text-align:left; font-size:14px; margin-bottom:10px;">
                 <p><b>İsim:</b> ${player.name}</p>
-                <p><b>Cinsiyet:</b> ${player.gender}</p>
                 <p><b>Seviye:</b> ${player.lvl}</p>
+                <p><b>XP:</b> ${player.xp} / ${player.nextXp}</p>
+                <p><b>Can:</b> ${player.hp} / ${player.maxHp}</p>
+                <p><b>Saldırı:</b> ${player.atk}</p>
             </div>
-            <button class="btn" onclick="openMenu()">🔙 GERİ DÖN</button>
+            <button class="btn" onclick="renderMainMenu()">🔙 GERİ DÖN</button>
         `;
     }
 
     function showMounts() {
-        if(player.lvl < 10) return; // Seviye kontrolü
-        document.getElementById('menu-content').innerHTML = `
-            <h2 style="color:var(--gold)">BİNEK PANELİ</h2>
-            <button class="btn" onclick="showMountAns()">📚 ANSİKLOPEDİ</button>
-            <button class="btn" onclick="alert('Henüz bineğin yok!')">🏠 BİNEKLERİM</button>
-            <button class="btn" onclick="openMenu()">🔙 GERİ DÖN</button>
-        `;
+        const content = document.getElementById('menu-content');
+        if(player.lvl < 10) {
+            content.innerHTML = `<h3>Kilitli</h3><p style="font-size:12px;">Seviye 10 olduğunda Elas'ın hediyesi seni bekliyor.</p><button class="btn" onclick="renderMainMenu()">🔙 GERİ</button>`;
+        } else {
+            content.innerHTML = `<h3>Bineklerin</h3><button class="btn" onclick="alert('Eski Tahta At: Hız +%10')">📚 ANSİKLOPEDİ</button><button class="btn" onclick="renderMainMenu()">🔙 GERİ</button>`;
+        }
     }
 
-    function showMountAns() {
-        document.getElementById('menu-content').innerHTML = `
-            <h2 style="color:var(--gold)">ANSİKLOPEDİ</h2>
-            <p style="font-size:14px;"><b>Eski Tahta At:</b> Elas'ın hediyesi. Hız: +%10</p>
-            <button class="btn" onclick="showMounts()">🔙 GERİ DÖN</button>
-        `;
-    }
-
-    function closeMenu() {
-        document.getElementById('menu-overlay').style.display = 'none';
-    }
+    function closeMenu() { document.getElementById('menu-overlay').style.display = 'none'; }
 </script>
 </body>
 </html>
