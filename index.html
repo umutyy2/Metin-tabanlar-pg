@@ -37,10 +37,15 @@ button:active {
   justify-content: space-between;
   margin-bottom: 20px;
 }
-select {
+select, input[type="range"], input[type="checkbox"] {
   width: 100%;
   padding: 10px;
   font-size: 16px;
+  margin: 5px 0 15px 0;
+}
+label {
+  display: block;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -70,6 +75,29 @@ select {
     <option value="tr">Türkçe</option>
     <option value="en">English</option>
   </select>
+
+  <div id="audioSettings">
+    <label>
+      Ana Ses
+      <input type="range" id="masterVolume" min="0" max="100" value="80">
+    </label>
+
+    <label>
+      Ambiyans
+      <input type="range" id="ambientVolume" min="0" max="100" value="70">
+    </label>
+
+    <label>
+      UI Sesleri
+      <input type="range" id="uiVolume" min="0" max="100" value="60">
+    </label>
+
+    <label>
+      Kulaklık Modu
+      <input type="checkbox" id="headphoneMode">
+    </label>
+  </div>
+
   <button onclick="goMenu()" id="backBtn">Geri</button>
 </div>
 
@@ -150,6 +178,29 @@ function applyLang() {
 }
 
 applyLang();
+
+const settings = {
+  masterVolume: 80,
+  ambientVolume: 70,
+  uiVolume: 60,
+  headphoneMode: false
+};
+
+document.getElementById("masterVolume").addEventListener("input", e => {
+  settings.masterVolume = e.target.value;
+});
+
+document.getElementById("ambientVolume").addEventListener("input", e => {
+  settings.ambientVolume = e.target.value;
+});
+
+document.getElementById("uiVolume").addEventListener("input", e => {
+  settings.uiVolume = e.target.value;
+});
+
+document.getElementById("headphoneMode").addEventListener("change", e => {
+  settings.headphoneMode = e.target.checked;
+});
 </script>
 
 </body>
