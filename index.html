@@ -103,7 +103,6 @@ function playMonsterSound(monsterId,direction){console.log("Canavar sesi çalıy
 function playNPCSound(npcId,action){console.log("NPC sesi çalıyor:",npcId,action);}
 
 let player={name:"",gender:null,class:null,level:1,experience:0,skills:[],unlockedMenus:{inventory:false,equipment:false,pets:false,mounts:false,heroLog:false}};
-
 const classes={
   Savasci:["Normal Saldırı","Güçlü Darbe","Kalkan Savunması","Hızlı Hamle","Yerevurma","Ölümcül Vuruş","Çifte Saldırı","Savunma Düşmanı","Savaş Ruhu","Efsanevi Darbe"],
   Buyucu:["Normal Saldırı","Ateş Topu","Buz Mızrağı","Şimşek","Rüzgar Dalgası","Büyü Kalkanı","Zihin Kontrolü","Element Patlaması","Mana Patlaması","Efsanevi Büyü"],
@@ -115,54 +114,12 @@ function unlockSkills(level){const c=player.class;player.skills=c?classes[c].fil
 
 let region={name:"Yeşil Vadi",minLevel:1,maxLevel:10,villages:["Kavak Köyü","Çınar Köyü","Ardıç Köyü"],city:"Altınşehir",npcs:[],monsters:[],quests:[]};
 
-function confirmCharacter(){
-  player.name=document.getElementById("playerName").value||"Kahraman";
-  player.gender=document.getElementById("playerGender").value;
-  player.class=document.getElementById("playerClass").value;
-  showScreen("game");
-  startRegion();
-}
-
-function startRegion(){
-  document.getElementById("storyText").innerText=`Burası ${region.name}. Yolculuğun başlıyor.`;
-  generateNPCs();
-  generateMonsters();
-  unlockMenus();
-  startTime();
-}
-
-function generateNPCs(){
-  region.npcs=[];
-  const namesMale=["Ali","Mehmet","Can","Emir"];
-  const namesFemale=["Ayşe","Elif","Zeynep","Derya"];
-  region.villages.forEach(v=>{
-    for(let i=0;i<3;i++){
-      region.npcs.push({name:namesMale[i],gender:"male",village:v});
-      region.npcs.push({name:namesFemale[i],gender:"female",village:v});
-    }
-  });
-  region.npcs.push({name:"Fatma",gender:"female",village:region.city});
-  region.npcs.push({name:"Ahmet",gender:"male",village:region.city});
-}
-
-function generateMonsters(){
-  region.monsters=[];
-  for(let lvl=1;lvl<=10;lvl++){region.monsters.push({name:"Canavar"+lvl,level:lvl,dropGold:lvl*2});}
-}
-
-function unlockMenus(){
-  if(player.level>=2)player.unlockedMenus.inventory=true;
-  if(player.level>=3)player.unlockedMenus.equipment=true;
-  if(player.level>=4)player.unlockedMenus.pets=true;
-  if(player.level>=5)player.unlockedMenus.mounts=true;
-  if(player.level>=6)player.unlockedMenus.heroLog=true;
-}
-
-function toggleGameMenu(){
-  const menu=document.getElementById("gameMenu");
-  menu.style.display=menu.style.display==="none"?"block":"none";
-}
-
+function confirmCharacter(){player.name=document.getElementById("playerName").value||"Kahraman";player.gender=document.getElementById("playerGender").value;player.class=document.getElementById("playerClass").value;showScreen("game");startRegion();}
+function startRegion(){document.getElementById("storyText").innerText=`Burası ${region.name}. Yolculuğun başlıyor.`;generateNPCs();generateMonsters();unlockMenus();startTime();}
+function generateNPCs(){region.npcs=[];const namesMale=["Ali","Mehmet","Can","Emir"];const namesFemale=["Ayşe","Elif","Zeynep","Derya"];region.villages.forEach(v=>{for(let i=0;i<3;i++){region.npcs.push({name:namesMale[i],gender:"male",village:v});region.npcs.push({name:namesFemale[i],gender:"female",village:v});}});region.npcs.push({name:"Fatma",gender:"female",village:region.city});region.npcs.push({name:"Ahmet",gender:"male",village:region.city});}
+function generateMonsters(){region.monsters=[];for(let lvl=1;lvl<=10;lvl++){region.monsters.push({name:"Canavar"+lvl,level:lvl,dropGold:lvl*2});}}
+function unlockMenus(){if(player.level>=2)player.unlockedMenus.inventory=true;if(player.level>=3)player.unlockedMenus.equipment=true;if(player.level>=4)player.unlockedMenus.pets=true;if(player.level>=5)player.unlockedMenus.mounts=true;if(player.level>=6)player.unlockedMenus.heroLog=true;}
+function toggleGameMenu(){const menu=document.getElementById("gameMenu");menu.style.display=menu.style.display==="none"?"block":"none";}
 function openInventory(){alert("Çanta açıldı!");}
 function openEquipment(){alert("Ekipman menüsü açıldı!");}
 function openPets(){alert("Evcil Hayvanlar açıldı!");}
@@ -170,23 +127,8 @@ function openMounts(){alert("Binekler açıldı!");}
 function openSkillMenu(){alert("Yetenekler açıldı!");}
 function openHeroLog(){alert("Kahraman Günlüğü açıldı!");}
 
-// Zaman ve Mevsim Sistemi
 let gameTime={hour:6,day:1,month:1,year:1000,season:"İlkbahar"};
-function startTime(){
-  setInterval(()=>{
-    gameTime.hour++;
-    if(gameTime.hour>=24){gameTime.hour=0;gameTime.day++;}
-    if(gameTime.day>30){gameTime.day=1;gameTime.month++;}
-    if(gameTime.month>12){gameTime.month=1;gameTime.year++;}
-    updateSeason();
-    document.getElementById("timeWeather").innerText=`Gün: ${gameTime.day}, Saat: ${gameTime.hour}:00, Mevsim: ${gameTime.season}`;
-  },60000); // 1 dk = 1 saat
-}
-function updateSeason(){
-  if(gameTime.month>=3&&gameTime.month<6)gameTime.season="İlkbahar";
-  else if(gameTime.month>=6&&gameTime.month<9)gameTime.season="Yaz";
-  else if(gameTime.month>=9&&gameTime.month<12)gameTime.season="Sonbahar";
-  else gameTime.season="Kış";
-}
+function startTime(){setInterval(()=>{gameTime.hour++;if(gameTime.hour>=24){gameTime.hour=0;gameTime.day++;}if(gameTime.day>30){gameTime.day=1;gameTime.month++;}if(gameTime.month>12){gameTime.month=1;gameTime.year++;}updateSeason();document.getElementById("timeWeather").innerText=`Gün: ${gameTime.day}, Saat: ${gameTime.hour}:00, Mevsim: ${gameTime.season}`;},60000);}
+function updateSeason(){if(gameTime.month>=3&&gameTime.month<6)gameTime.season="İlkbahar";else if(gameTime.month>=6&&gameTime.month<9)gameTime.season="Yaz";else if(gameTime.month>=9&&gameTime.month<12)gameTime.season="Sonbahar";else gameTime.season="Kış";}
 </script></body>
 </html>
