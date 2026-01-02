@@ -1,120 +1,135 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Metin Tabanlı RPG</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { background-color: #0d0d0d; color: #f2f2f2; font-family: Arial, sans-serif; padding: 20px; }
-    button { width: 100%; padding: 15px; margin: 10px 0; font-size: 18px; background-color: #1f1f1f; color: white; border: none; border-radius: 6px; }
-    button:focus { outline: 3px solid #00ffcc; }
-    .hidden { display: none; }
-    #container { max-width: 600px; margin: 0 auto; }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    #game {
+      padding: 16px;
+    }
+    #text {
+      font-size: 18px;
+      margin-bottom: 20px;
+      min-height: 120px;
+    }
+    .choice {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      font-size: 16px;
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+    }
+    .choice:active {
+      background: #444;
+    }
+    #menu {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+    }
+    #menu button {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
-  <div id="container">
-    <h1 id="gameTitle">METİN TABANLI RPG</h1>
-    <p id="gameSubtitle">Karanlık bir dünyada yolculuk başlıyor.</p>
 
-    <div id="menu">
-      <button onclick="startGame()" aria-label="Oyuna başla">Oyuna Başla</button>
-      <button onclick="openOptions()" aria-label="Seçenekler">Seçenekler</button>
-      <button onclick="openCredits()" aria-label="Hakkında">Hakkında</button>
-    </div>
+<div id="menu">
+  <button onclick="openSettings()">⚙️</button>
+</div>
 
-    <div id="options" class="hidden">
-      <h2>Seçenekler</h2>
-      <button onclick="setLanguage('tr')">Türkçe</button>
-      <button onclick="setLanguage('en')">English</button>
-      <button onclick="backToMenu()">Geri</button>
-    </div>
+<div id="game">
+  <div id="text"></div>
+  <div id="choices"></div>
+</div>
 
-    <div id="game" class="hidden">
-      <p id="storyText"></p>
-      <button onclick="nextText()">Devam Et</button>
-      <button onclick="backToMenu()">Menüye Dön</button>
-    </div>
-
-    <div id="credits" class="hidden">
-      <p>Bu oyun Umut tarafından geliştirilmektedir.</p>
-      <button onclick="backToMenu()">Geri</button>
-    </div>
-  </div>
+<audio id="clickSound" src="click.mp3" preload="auto"></audio>
 
 <script>
   let language = "tr";
-  let storyIndex = 0;
 
-  const story = {
-    tr: [
-      "Soğuk rüzgar dağların arasından esiyor.",
-      "Uzaktan bir köyün ışıkları görünüyor.",
-      "Yolculuğun henüz başlıyor."
-    ],
-    en: [
-      "Cold winds blow through the mountains.",
-      "Lights of a village appear in the distance.",
-      "Your journey has just begun."
-    ]
+  const texts = {
+    tr: {
+      start: "Sisli bir ovada gözlerini açıyorsun. Rüzgar kulağına fısıldıyor.",
+      choice1: "Etrafına bak",
+      choice2: "İleri yürü",
+      end: "Bu bölgeyi tamamladın. Devamı yakında."
+    },
+    en: {
+      start: "You wake up in a foggy field. The wind whispers.",
+      choice1: "Look around",
+      choice2: "Walk forward",
+      end: "You completed this area. More is coming soon."
+    }
   };
 
-  function hideAll() {
-    document.getElementById("menu").classList.add("hidden");
-    document.getElementById("options").classList.add("hidden");
-    document.getElementById("game").classList.add("hidden");
-    document.getElementById("credits").classList.add("hidden");
+  function playClick() {
+    document.getElementById("clickSound").play();
   }
 
-  function backToMenu() {
-    hideAll();
-    document.getElementById("menu").classList.remove("hidden");
+  function renderStart() {
+    document.getElementById("text").innerText = texts[language].start;
+    const choices = document.getElementById("choices");
+    choices.innerHTML = "";
+
+    const btn1 = document.createElement("button");
+    btn1.className = "choice";
+    btn1.innerText = texts[language].choice1;
+    btn1.onclick = () => {
+      playClick();
+      endScene();
+    };
+
+    const btn2 = document.createElement("button");
+    btn2.className = "choice";
+    btn2.innerText = texts[language].choice2;
+    btn2.onclick = () => {
+      playClick();
+      endScene();
+    };
+
+    choices.appendChild(btn1);
+    choices.appendChild(btn2);
   }
 
-  function openOptions() {
-    hideAll();
-    document.getElementById("options").classList.remove("hidden");
+  function endScene() {
+    document.getElementById("text").innerText = texts[language].end;
+    document.getElementById("choices").innerHTML = "";
   }
 
-  function openCredits() {
-    hideAll();
-    document.getElementById("credits").classList.remove("hidden");
-  }
-
-  function setLanguage(lang) {
+  function openSettings() {
+    const lang = prompt("Dil seç / Select language (tr / en):");
     if (lang === "tr" || lang === "en") {
       language = lang;
-    }
-    // Eğer oyunda isek hikayeyi yeniden göster
-    updateStory();
-  }
-
-  function startGame() {
-    hideAll();
-    document.getElementById("game").classList.remove("hidden");
-    storyIndex = 0;
-    updateStory();
-  }
-
-  function nextText() {
-    storyIndex++;
-    if (storyIndex < story[language].length) {
-      updateStory();
-    } else {
-      document.getElementById("storyText").innerText =
-        language === "tr"
-          ? "Şimdilik bu kadar. Devamı yakında."
-          : "That's all for now. More coming soon.";
+      renderStart();
     }
   }
 
-  function updateStory() {
-    const text = story[language][storyIndex] || "";
-    document.getElementById("storyText").innerText = text;
-  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const firstChoice = document.querySelector(".choice");
+      if (firstChoice) firstChoice.click();
+    }
+  });
 
-  // Başlangıçta menüyü göster
-  backToMenu();
+  renderStart();
 </script>
+
 </body>
 </html>
