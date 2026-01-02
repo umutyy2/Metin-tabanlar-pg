@@ -98,6 +98,7 @@ label {
     </label>
   </div>
 
+  <button onclick="saveSettings()">Kaydet</button>
   <button onclick="goMenu()" id="backBtn">Geri</button>
 </div>
 
@@ -143,18 +144,22 @@ function showScreen(id) {
 }
 
 function startGame() {
+  playUI("start");
   showScreen("game");
 }
 
 function openSettings() {
+  playUI("settings");
   showScreen("settings");
 }
 
 function openAbout() {
+  playUI("about");
   showScreen("about");
 }
 
 function goMenu() {
+  playUI("back");
   showScreen("menu");
 }
 
@@ -201,6 +206,50 @@ document.getElementById("uiVolume").addEventListener("input", e => {
 document.getElementById("headphoneMode").addEventListener("change", e => {
   settings.headphoneMode = e.target.checked;
 });
+
+function saveSettings() {
+  localStorage.setItem("rpgSettings", JSON.stringify(settings));
+  alert(currentLang === "tr" ? "Ayarlar kaydedildi!" : "Settings saved!");
+}
+
+function loadSettings() {
+  const s = JSON.parse(localStorage.getItem("rpgSettings"));
+  if(s){
+    settings.masterVolume = s.masterVolume;
+    settings.ambientVolume = s.ambientVolume;
+    settings.uiVolume = s.uiVolume;
+    settings.headphoneMode = s.headphoneMode;
+    document.getElementById("masterVolume").value = s.masterVolume;
+    document.getElementById("ambientVolume").value = s.ambientVolume;
+    document.getElementById("uiVolume").value = s.uiVolume;
+    document.getElementById("headphoneMode").checked = s.headphoneMode;
+  }
+}
+loadSettings();
+
+function playUI(action) {
+  console.log("UI Ses çalıyor:", action);
+}
+
+function playAmbient(type) {
+  console.log("Ambiyans Ses çalıyor:", type);
+}
+
+function playSkillSound(skillId) {
+  console.log("Yetenek sesi çalıyor:", skillId);
+}
+
+function playWeaponSound(weaponId) {
+  console.log("Silah sesi çalıyor:", weaponId);
+}
+
+function playMonsterSound(monsterId, direction) {
+  console.log("Canavar sesi çalıyor:", monsterId, direction);
+}
+
+function playNPCSound(npcId, action) {
+  console.log("NPC sesi çalıyor:", npcId, action);
+}
 </script>
 
 </body>
