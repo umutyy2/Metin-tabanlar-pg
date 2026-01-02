@@ -4,59 +4,42 @@
   <meta charset="UTF-8">
   <title>Metin Tabanlı RPG</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
-    body {
-      background-color: #0d0d0d;
-      color: #f2f2f2;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    button {
-      width: 100%;
-      padding: 15px;
-      margin: 10px 0;
-      font-size: 18px;
-      background-color: #1f1f1f;
-      color: white;
-      border: none;
-      border-radius: 6px;
-    }
-    button:focus {
-      outline: 3px solid #00ffcc;
-    }
-    .hidden {
-      display: none;
-    }
+    body { background-color: #0d0d0d; color: #f2f2f2; font-family: Arial, sans-serif; padding: 20px; }
+    button { width: 100%; padding: 15px; margin: 10px 0; font-size: 18px; background-color: #1f1f1f; color: white; border: none; border-radius: 6px; }
+    button:focus { outline: 3px solid #00ffcc; }
+    .hidden { display: none; }
+    #container { max-width: 600px; margin: 0 auto; }
   </style>
 </head>
-
 <body>
+  <div id="container">
+    <h1 id="gameTitle">METİN TABANLI RPG</h1>
+    <p id="gameSubtitle">Karanlık bir dünyada yolculuk başlıyor.</p>
 
-  <h1 id="gameTitle">METİN TABANLI RPG</h1>
-  <p id="gameSubtitle">Karanlık bir dünyada yolculuk başlıyor.</p>
+    <div id="menu">
+      <button onclick="startGame()" aria-label="Oyuna başla">Oyuna Başla</button>
+      <button onclick="openOptions()" aria-label="Seçenekler">Seçenekler</button>
+      <button onclick="openCredits()" aria-label="Hakkında">Hakkında</button>
+    </div>
 
-  <div id="menu">
-    <button onclick="startGame()" aria-label="Oyuna başla">Oyuna Başla</button>
-    <button onclick="openOptions()" aria-label="Seçenekler">Seçenekler</button>
-    <button onclick="openCredits()" aria-label="Hakkında">Hakkında</button>
-  </div>
+    <div id="options" class="hidden">
+      <h2>Seçenekler</h2>
+      <button onclick="setLanguage('tr')">Türkçe</button>
+      <button onclick="setLanguage('en')">English</button>
+      <button onclick="backToMenu()">Geri</button>
+    </div>
 
-  <div id="options" class="hidden">
-    <h2>Seçenekler</h2>
-    <button onclick="setLanguage('tr')">Türkçe</button>
-    <button onclick="setLanguage('en')">English</button>
-    <button onclick="backToMenu()">Geri</button>
-  </div>
+    <div id="game" class="hidden">
+      <p id="storyText"></p>
+      <button onclick="nextText()">Devam Et</button>
+      <button onclick="backToMenu()">Menüye Dön</button>
+    </div>
 
-  <div id="game" class="hidden">
-    <p id="storyText"></p>
-    <button onclick="nextText()">Devam Et</button>
-  </div>
-
-  <div id="credits" class="hidden">
-    <p>Bu oyun Umut tarafından geliştirilmektedir.</p>
-    <button onclick="backToMenu()">Geri</button>
+    <div id="credits" class="hidden">
+      <p>Bu oyun Umut tarafından geliştirilmektedir.</p>
+      <button onclick="backToMenu()">Geri</button>
+    </div>
   </div>
 
 <script>
@@ -76,6 +59,36 @@
     ]
   };
 
+  function hideAll() {
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("options").classList.add("hidden");
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("credits").classList.add("hidden");
+  }
+
+  function backToMenu() {
+    hideAll();
+    document.getElementById("menu").classList.remove("hidden");
+  }
+
+  function openOptions() {
+    hideAll();
+    document.getElementById("options").classList.remove("hidden");
+  }
+
+  function openCredits() {
+    hideAll();
+    document.getElementById("credits").classList.remove("hidden");
+  }
+
+  function setLanguage(lang) {
+    if (lang === "tr" || lang === "en") {
+      language = lang;
+    }
+    // Eğer oyunda isek hikayeyi yeniden göster
+    updateStory();
+  }
+
   function startGame() {
     hideAll();
     document.getElementById("game").classList.remove("hidden");
@@ -90,9 +103,18 @@
     } else {
       document.getElementById("storyText").innerText =
         language === "tr"
-        ? "Şimdilik bu kadar. Devamı yakında."
-        : "That's all for now. More coming soon.";
+          ? "Şimdilik bu kadar. Devamı yakında."
+          : "That's all for now. More coming soon.";
     }
   }
 
-  function updateStory()
+  function updateStory() {
+    const text = story[language][storyIndex] || "";
+    document.getElementById("storyText").innerText = text;
+  }
+
+  // Başlangıçta menüyü göster
+  backToMenu();
+</script>
+</body>
+</html>
