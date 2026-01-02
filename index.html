@@ -3,68 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metin Tabanlı RPG</title>
+    <title>RPG - Sisli Orman Günlükleri</title>
     <style>
-        /* CSS Özellikleri */
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
+        :root { --gold: #f1c40f; --bg: #1a1a1a; --panel: #2c3e50; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .game-container { width: 480px; background: var(--panel); border-radius: 20px; padding: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.8); border: 2px solid #34495e; }
         
-        .screen {
-            display: none;
-            padding: 20px;
-        }
-        
-        .screen.active {
-            display: block;
-        }
-        
-        button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-        }
+        /* Ekranlar */
+        .screen { display: none; }
+        .active { display: block; }
 
-        button:active {
-            background-color: #333;
-            color: white;
-        }
+        /* HUD */
+        .hud { display: flex; justify-content: space-between; border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; }
+        .stats span { color: var(--gold); font-weight: bold; }
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            background-color: #eee;
-            padding: 10px;
-        }
+        /* Hikaye ve Log Alanı */
+        .display-area { height: 280px; background: #000; border-radius: 10px; padding: 15px; overflow-y: auto; font-size: 0.95em; border: 1px solid #444; margin-bottom: 15px; }
+        .log-entry { margin-bottom: 8px; border-left: 2px solid #555; padding-left: 8px; }
+        .system-msg { color: #2ecc71; font-weight: bold; }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
+        /* Butonlar */
+        .btn { background: #3498db; color: white; border: none; padding: 12px; width: 100%; margin: 5px 0; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 15px; }
+        .btn:hover { background: #2980b9; transform: scale(1.02); }
+        .btn-battle { background: #e74c3c; }
+        .btn-locked { background: #7f8c8d; cursor: not-allowed; opacity: 0.5; }
 
-        #gameMenu {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-        }
+        /* Alt Menü İkonları */
+        .menu-bar { display: flex; justify-content: space-around; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; margin-top: 10px; }
+        .icon { font-size: 24px; opacity: 0.2; transition: 0.3s; position: relative; }
+        .icon.unlocked { opacity: 1; cursor: pointer; }
+        .icon-label { position: absolute; bottom: -12px; font-size: 9px; width: 100%; text-align: center; }
+
+        /* Karakter Oluşturma */
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #1a1a1a; color: white; border: 1px solid #555; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div id="menu" class="screen active">
-        <h1 id="header">Metin Tabanlı RPG</h1>
-        <button onclick="startGame()">Oyuna Başla</button>
+    <div id="char-screen" class="game-container screen active">
+        <h2 style="text-align:center; color:var(--gold)">Karakterini Yarat</h2>
+        <input type="text" id="input-name" placeholder="Kahraman Adı..." maxlength="12">
+        <select id="input-gender">
+            <option value="Erkek">Erkek</option>
+            <option value="Kadın">Kadın</option>
+        </select>
+        <select id="input-class">
+            <option value="">Sınıf Seç...</option>
+            <option value="savasci">Savaşçı</option>
+            <option value="buyucu">Büyücü</option>
+            <option value="avci">Avcı</option>
+            <option value="sifaci">Şifacı</option>
+        </select>
+        <button class="btn" onclick="initGame()">Maceraya Başla</button>
     </div>
 
-    <div id="game" class="screen">
-        <div class="top-bar">
-            <span>Can: 100</span>
-            <span>Altın: 0</span>
+    <div id="game-screen" class="game-container screen">
+        <div class="hud">
+            <div class="stats">
+                <span id="p-name-disp">İsim</span> <br>
+                <small id="p-class-disp">Sınıf</small>
+            </div>
+            <div style="text-align: right;">
+                Lv: <span id="p-lvl-disp">1</span> <br>
+                XP: <span id="p-xp-disp">0/100</span>
+            </div>
         </div>
-        <p>Maceraya hoş geldin!</p>
+
+        <div class="display-area" id="main-log">
+            </div>
+
+        <div id="action-buttons">
+            </div>
+
+        <div class="menu-bar">
+            <div id="icon-bag" class="icon">🎒<div class="icon-label">Lv.2</div></div>
+            <div id="icon-equip" class="icon">⚔️<div class="icon-label">Lv.3</div></div>
+            <div id="icon-pet" class="icon">🐾<div class="icon-label">Lv.8</div></div>
+            <div id="icon-mount" class="icon">🐎<div class="icon-label">Lv.10</div></div>
+        </div>
     </div>
 
+<script>
+    // VERİ YAPILARI
+    const classes = {
+        savasci: { skills: ["Sarsan Darbe", "Meydan Okuma", "Demir Deri", "Kan Bağı", "Ejderha Kükremesi", "İntikam Patlaması", "Sarsılmaz Duruş", "Deprem Adımı", "Koruyucu Melek", "Ares'in Gazabı"] },
+        buyucu: { skills: ["Mana Kalkanı", "Buz Mezarı", "Zaman Bükme", "Serap", "Elementel Çağrı", "Zihin Yağması", "Kozmik Işınlanma", "Madde Dönüşümü", "Yıldız Tozu", "Kaos Patlaması"] },
+        avci: { skills: ["İz Sürme", "Dikenli Tuzak", "Avcı Görüşü", "Zehirli Ok Yağmuru", "Sadık Dost", "Kamuflaj", "Felç Eden Nişan", "Doğanın Çağrısı", "Sis Bombası", "Göklerin Gazabı"] },
+        sifaci: { skills: ["Kutsal Koruma", "Arınma", "Işık Patlaması", "Yaşam Bağı", "Huzur Alanı", "Günah Çıkarma", "Yeniden Doğuş", "Kutsal Adalet", "Melek Kanatları", "Tanrısal Müdahale"] }
+    };
+
+    let p = { name: "", gender: "", class: "", lvl: 1, xp: 0, nextXp: 100, lastStoryLvl: 0 };
+
+    // BAŞLATMA
+    function initGame() {
+        p.name = document.getElementById('input-name').value;
+        p.gender = document.getElementById('input-gender').value;
+        p.class = document.getElementById('input-class').value;
+
+        if(!p.name || !p.class) return alert("Eksik bilgi!");
+
+        document.getElementById('char-screen').classList.remove('active');
+        document.getElementById('game-screen').classList.add('active');
+        
+        document.getElementById('p-name-disp').innerText = p.name;
+        document.getElementById('p-class-disp').innerText = p.class.toUpperCase();
+        
+        writeLog(`Gözlerini açıyorsun... Sisli bir ormandasın. Elas adında yaşlı bir adam sana bakıyor.`);
+        updateUI();
+    }
+
+    // ANA MOTOR
+    function updateUI() {
+        document.getElementById('p-lvl-disp').innerText = p.lvl;
+        document.getElementById('p-xp-disp').innerText = `${p.xp}/${p.nextXp}`;
+        
+        const actions = document.getElementById('action-buttons');
+        actions.innerHTML = "";
+
+        // Sistem İkonları
+        if(p.lvl >= 2) unlockIcon('icon-bag');
+        if(p.lvl >= 3) unlockIcon('icon-equip');
+        if(p.lvl >= 8) unlockIcon('icon-pet');
+        if(p.lvl >= 10) unlockIcon('icon-mount');
+
+        // Hikaye Butonu (Eğer yeni hikaye varsa)
+        if(p.lvl > p.lastStoryLvl) {
+            let btn = createBtn("Elas ile Konuş (Hikaye)", () => playStory(), "btn");
+            btn.style.border = "2px solid var(--gold)";
+            actions.appendChild(btn);
+        }
+
+        // Keşif Butonu
+        actions.appendChild(createBtn("Ormanda Avlan (XP Kazan)", () => battle(), "btn btn-battle"));
+
+        // Yetenek Butonları (Her 5 Seviye)
+        const mySkills = classes[p.class].skills;
+        mySkills.forEach((s, i) => {
+            let req = (i === 0) ? 1 : (i + 1) * 5;
+            if(p.lvl >= req) {
+                actions.appendChild(createBtn(`✨ ${s}`, () => writeLog(`${s} yeteneğini kullandın!`), "btn"));
+            }
+        });
+    }
+
+    function battle() {
+        let gain = 25 + (p.lvl * 5);
+        writeLog(`Vahşi bir yaratık yendin! +${gain} XP kazandın.`);
+        p.xp += gain;
+        if(p.xp >= p.nextXp) {
+            p.lvl++;
+            p.xp = 0;
+            p.nextXp += 50;
+            writeLog(`<span class="system-msg">TEBRİKLER! Seviye ${p.lvl} oldun! Elas'ın yanına dön.</span>`);
+        }
+        updateUI();
+    }
+
+    function playStory() {
+        p.lastStoryLvl = p.lvl;
+        if(p.lvl === 1) writeLog("Elas: 'Hoş geldin. Kolundaki dövme parlıyor, sen seçilmiş biri olabilirsin...'");
+        if(p.lvl === 2) {
+            writeLog("Elas: 'Al bu çantayı (Lv.2). Topladığın eşyaları içine koyarsın.'");
+            writeLog("<small>Eğitim: Çanta butonu artık aktif!</small>");
+        }
+        if(p.lvl === 3) {
+            writeLog("Elas: 'Kendini savunmalısın. İşte ilk silahın (Lv.3).' ");
+            writeLog("<small>Eğitim: Ekipman sistemi aktif!</small>");
+        }
+        if(p.lvl === 8) {
+            writeLog("Elas: 'Bu küçük yaratık (Lv.8) seni sevmişe benziyor. Artık seninle gelecek.'");
+        }
+        if(p.lvl === 10) {
+            writeLog("Elas: 'Orman maceran bitti. Al bu tahta atı (Lv.10), asıl hikaye krallık kapısında başlıyor...'");
+        }
+        updateUI();
+    }
+
+    function unlockIcon(id) {
+        let el = document.getElementById(id);
+        el.classList.add('unlocked');
+        el.querySelector('.icon-label').innerText = "AÇIK";
+        el.onclick = () => writeLog(`${id.split('-')[1]} sistemi tıklandı. (Eğitim Modu)`);
+    }
+
+    function writeLog(msg) {
+        const log = document.getElementById('main-log');
+        log.innerHTML += `<div class="log-entry">> ${msg}</div>`;
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function createBtn(txt, func, cls) {
+        let b = document.createElement("button");
+        b.className = cls;
+        b.innerText = txt;
+        b.onclick = func;
+        return b;
+    }
+</script>
 </body>
 </html>
