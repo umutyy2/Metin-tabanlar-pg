@@ -2,27 +2,29 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Sisli Orman Günlükleri - Stabil Sürüm</title>
+    <title>Sisli Orman Günlükleri - Final Fix</title>
     <style>
-        :root { --gold: #f1c40f; --bg: #0d0d0d; --panel: #1a1a1a; --text: #e0e0e0; --blue: #3498db; --red: #e74c3c; }
+        :root { --gold: #f1c40f; --bg: #0d0d0d; --panel: #1a1a1a; --text: #e0e0e0; --blue: #3498db; --red: #e74c3c; --locked: #444; }
         body { background: var(--bg); color: var(--text); font-family: 'Garamond', serif; margin: 0; overflow: hidden; }
         
-        /* KURULUM EKRANI (TAM EKRAN) */
+        /* KURULUM EKRANI */
         #setup { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .setup-box { background: var(--panel); padding: 30px; border: 2px solid var(--gold); border-radius: 15px; width: 320px; text-align: center; }
 
-        /* OYUN ANA EKRAN */
+        /* ANA EKRAN */
         #game-view { display: none; height: 100vh; flex-direction: column; }
-        #display { flex: 1; padding: 25px; overflow-y: auto; background: linear-gradient(to bottom, #111, #000); }
-        .log { margin-bottom: 12px; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border-left: 3px solid #444; }
+        #display { flex: 1; padding: 25px; overflow-y: auto; background: linear-gradient(to bottom, #111, #000); padding-bottom: 100px; }
+        .log { margin-bottom: 12px; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border-left: 3px solid #444; font-size: 15px; line-height: 1.4; }
 
-        /* MENÜ BUTONU (BAŞTA GİZLİ) */
-        #menu-trigger { position: fixed; bottom: 20px; right: 20px; width: 65px; height: 65px; background: var(--gold); color: #000; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; z-index: 1000; }
+        /* BUTONLAR */
+        #explore-btn { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--blue); border: none; color: white; font-weight: bold; font-size: 18px; cursor: pointer; display: none; z-index: 500; }
+        #menu-trigger { position: fixed; bottom: 15px; right: 15px; width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; z-index: 1000; border: 2px solid #000; }
 
-        /* OVERLAY (MENÜ VE DİYALOG İÇİN TEK YAPI) */
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
-        .opt-btn { background: #222; color: white; border: 1px solid #444; padding: 12px; margin: 5px; border-radius: 8px; cursor: pointer; width: 260px; text-align: center; font-family: inherit; font-size: 16px; }
-        .opt-btn:hover { border-color: var(--gold); background: #2a2a2a; }
+        /* MENÜ VE DİYALOG PANELLERİ */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
+        .opt-btn { background: #222; color: white; border: 1px solid #444; padding: 12px; margin: 5px; border-radius: 8px; cursor: pointer; width: 260px; text-align: center; font-family: inherit; font-size: 16px; transition: 0.2s; }
+        .opt-btn:hover:not(.disabled) { border-color: var(--gold); background: #333; }
+        .disabled { opacity: 0.4; cursor: not-allowed; background: #111; color: #666; }
 
         input, select { padding: 12px; margin: 10px; width: 85%; border-radius: 5px; border: 1px solid #444; background: #222; color: white; font-family: inherit; }
     </style>
@@ -31,49 +33,32 @@
 
     <div id="setup">
         <div class="setup-box">
-            <h2 style="color:var(--gold); margin-top:0;">RUHUNU UYANDIR</h2>
-            <input type="text" id="p-name-in" placeholder="Karakter Adı...">
-            
-            <p style="margin:10px 0 5px 0; font-size:14px; color:var(--gold);">CİNSİYET SEÇİMİ</p>
-            <select id="p-gender-in">
-                <option value="erkek">Erkek</option>
-                <option value="kadin">Kadın</option>
-            </select>
-
-            <p style="margin:10px 0 5px 0; font-size:14px; color:var(--gold);">SINIF SEÇİMİ</p>
-            <select id="p-class-in">
-                <option value="savasci">Savaşçı</option>
-                <option value="buyucu">Büyücü</option>
-                <option value="avci">Avcı</option>
-                <option value="sifaci">Şifacı</option>
-            </select>
-            
-            <button class="opt-btn" onclick="initGame()" style="background:var(--gold); color:black; font-weight:bold; border:none; margin-top:15px;">MACERAYA BAŞLA</button>
+            <h2 style="color:var(--gold)">RUHUNU UYANDIR</h2>
+            <input type="text" id="p-name-in" placeholder="Adın...">
+            <select id="p-gender-in"><option value="erkek">Erkek</option><option value="kadin">Kadın</option></select>
+            <select id="p-class-in"><option value="savasci">Savaşçı</option><option value="buyucu">Büyücü</option><option value="avci">Avcı</option></select>
+            <button class="opt-btn" onclick="initGame()" style="background:var(--gold); color:black; font-weight:bold; border:none;">BAŞLA</button>
         </div>
     </div>
 
     <div id="game-view">
         <div id="display"></div>
-        <button id="explore-btn" onclick="spawnBattle()" style="padding:20px; background:var(--blue); border:none; color:white; font-weight:bold; cursor:pointer; display:none;">ORMANI KEŞFET</button>
+        <button id="explore-btn" onclick="spawnBattle()">ORMANI KEŞFET</button>
     </div>
 
     <div id="menu-trigger" onclick="openMainMenu()">📜</div>
 
-    <div id="menu-panel" class="overlay">
-        </div>
+    <div id="menu-panel" class="overlay"></div>
 
 <script>
     let player = {
         name: "", gender: "", class: "", lvl: 1, xp: 0,
-        hp: 100, maxHp: 100, gold: 0,
-        myPets: [], myMounts: []
+        myPets: [], myMounts: [], storyProgress: 0
     };
 
-    // --- BAŞLATMA ---
     function initGame() {
         const name = document.getElementById('p-name-in').value;
-        if(!name) return alert("Lütfen adınızı girin!");
-
+        if(!name) return alert("Adını gir!");
         player.name = name;
         player.gender = document.getElementById('p-gender-in').value;
         player.class = document.getElementById('p-class-in').value;
@@ -81,101 +66,98 @@
         document.getElementById('setup').style.display = 'none';
         document.getElementById('game-view').style.display = 'flex';
         
+        // HİKAYE BAŞLAT
         startIntro();
     }
 
-    // --- HİKAYE BAŞLANGICI ---
     function startIntro() {
-        let hitap = player.gender === "erkek" ? "delikanlı" : "genç kız";
-        renderDialogue(
-            "Elas",
-            `Gözlerini açtın demek... Korkma ${hitap}, güvendesin. Adın ${player.name} olmalı, sayıklarken duydum. Hatırlıyor musun, buraya nasıl geldin?`,
-            [{ t: "Hiçbir şey hatırlamıyorum...", n: "close" }]
-        );
-    }
-
-    function renderDialogue(speaker, text, opts) {
-        const panel = document.getElementById('menu-panel');
-        panel.style.display = 'flex';
-        panel.innerHTML = `
-            <div style="background:#111; padding:30px; border-top:3px solid var(--gold); width:100%; position:fixed; bottom:0;">
-                <div style="color:var(--gold); font-weight:bold; margin-bottom:10px;">${speaker}</div>
-                <div style="margin-bottom:20px; font-style:italic;">"${text}"</div>
-                ${opts.map(o => `<button class="opt-btn" onclick="handleDiag('${o.n}')">${o.t}</button>`).join('')}
-            </div>
-        `;
+        let h = player.gender === "erkek" ? "delikanlı" : "genç kız";
+        renderDialogue("Elas", `Uyan ${h}... Adın ${player.name} olmalı. Burası Sisli Orman, tehlikelidir.`, [
+            { t: "Neredeyim ben?", n: "intro_2" }
+        ]);
     }
 
     function handleDiag(action) {
-        if(action === 'close') {
+        if(action === 'intro_2') {
+            renderDialogue("Elas", "Bir mühürle buraya bırakılmışsın. Şimdi dinlen, sonra keşfe çıkarsın.", [{ t: "Tamamdır.", n: "close" }]);
+        } else if(action === 'close') {
             document.getElementById('menu-panel').style.display = 'none';
+            // SADECE HİKAYE BİTİNCE BUTONLAR GELİR
             document.getElementById('menu-trigger').style.display = 'flex';
             document.getElementById('explore-btn').style.display = 'block';
-            addLog("Maceran başlıyor... Sağ alttaki parşömenden (📜) menüye ulaşabilirsin.");
+            addLog("Maceran başladı. Keşfet butonuna basarak ormanı dolaşabilirsin.");
         }
     }
 
-    // --- ANA MENÜ SİSTEMİ ---
     function openMainMenu() {
-        const panel = document.getElementById('menu-panel');
-        panel.style.display = 'flex';
-        panel.innerHTML = `
+        const p = document.getElementById('menu-panel');
+        p.style.display = 'flex';
+        // KİLİT KONTROLÜ
+        const petStatus = player.lvl >= 8 ? "" : "disabled";
+        const mountStatus = player.lvl >= 10 ? "" : "disabled";
+
+        p.innerHTML = `
             <h2 style="color:var(--gold)">📜 ANA MENÜ</h2>
             <button class="opt-btn" onclick="showProfile()">👤 PROFİL</button>
-            <button class="opt-btn" onclick="showBag()">🎒 ÇANTA</button>
-            <button class="opt-btn" onclick="showPetMenu()">🐾 EVCİL HAYVAN</button>
-            <button class="opt-btn" onclick="showMountMenu()">🐎 BİNEK</button>
+            <button class="opt-btn ${petStatus}" onclick="${player.lvl >= 8 ? 'showPetMenu()' : ''}">🐾 EVCİL HAYVAN ${player.lvl < 8 ? '(LV 8)' : ''}</button>
+            <button class="opt-btn ${mountStatus}" onclick="${player.lvl >= 10 ? 'showMountMenu()' : ''}">🐎 BİNEK ${player.lvl < 10 ? '(LV 10)' : ''}</button>
             <button class="opt-btn" style="background:var(--red)" onclick="closePanel()">❌ KAPAT</button>
         `;
     }
 
-    // --- BİNEK MENÜSÜ (İSTEDİĞİN GİBİ İKİLİ YAPI) ---
     function showMountMenu() {
-        const panel = document.getElementById('menu-panel');
-        panel.innerHTML = `
+        const p = document.getElementById('menu-panel');
+        p.innerHTML = `
             <h2 style="color:var(--gold)">🐎 BİNEK PANELİ</h2>
-            <button class="opt-btn" onclick="showMountAnsiklopedi()">📚 BİNEK ANSİKLOPEDİSİ</button>
+            <button class="opt-btn" onclick="showMountAns()">📚 BİNEK ANSİKLOPEDİSİ</button>
             <button class="opt-btn" onclick="showMyMounts()">🏠 BİNEKLERİM (${player.myMounts.length})</button>
             <button class="opt-btn" onclick="openMainMenu()">🔙 GERİ DÖN</button>
         `;
     }
 
-    function showMountAnsiklopedi() {
-        const panel = document.getElementById('menu-panel');
-        panel.innerHTML = `
+    function showMountAns() {
+        const p = document.getElementById('menu-panel');
+        p.innerHTML = `
             <h2 style="color:var(--gold)">📚 BİNEK REHBERİ</h2>
-            <div style="background:#222; padding:15px; border-radius:10px; width:280px; text-align:left; margin-bottom:10px;">
-                <b style="color:var(--gold)">Eski Tahta At</b><br>
-                <small>Hız: +%10 | Seviye 10'da Elas verir.</small>
+            <div style="background:#222; padding:15px; border-radius:10px; width:260px; text-align:left;">
+                <b style="color:var(--gold)">Eski Tahta At</b><br><small>Hız: +%10 | Seviye 10'da Elas verir.</small>
             </div>
-            <button class="opt-btn" onclick="showMountMenu()">🔙 GERİ DÖN</button>
+            <button class="opt-btn" onclick="showMountMenu()" style="margin-top:10px;">🔙 GERİ DÖN</button>
         `;
     }
 
-    // --- DİĞER FONKSİYONLAR ---
     function showProfile() {
-        const panel = document.getElementById('menu-panel');
-        panel.innerHTML = `
+        const p = document.getElementById('menu-panel');
+        p.innerHTML = `
             <h2 style="color:var(--gold)">👤 PROFİL</h2>
             <div style="background:#222; padding:20px; border-radius:10px; width:260px; text-align:left;">
                 <p>İsim: ${player.name}</p>
                 <p>Cinsiyet: ${player.gender === 'erkek' ? 'Erkek' : 'Kadın'}</p>
-                <p>Sınıf: ${player.class.toUpperCase()}</p>
                 <p>Seviye: ${player.lvl}</p>
             </div>
             <button class="opt-btn" onclick="openMainMenu()">🔙 GERİ DÖN</button>
         `;
     }
 
+    // YARDIMCI FONKSİYONLAR
+    function renderDialogue(s, t, o) {
+        const p = document.getElementById('menu-panel');
+        p.style.display = 'flex';
+        p.innerHTML = `
+            <div style="background:#111; padding:25px; border-top:3px solid var(--gold); width:100%; position:fixed; bottom:0; box-sizing:border-box;">
+                <div style="color:var(--gold); font-weight:bold; margin-bottom:10px;">${s}</div>
+                <div style="margin-bottom:15px; font-style:italic;">"${t}"</div>
+                ${o.map(opt => `<button class="opt-btn" onclick="handleDiag('${opt.n}')">${opt.t}</button>`).join('')}
+            </div>
+        `;
+    }
     function closePanel() { document.getElementById('menu-panel').style.display = 'none'; }
     function addLog(m) {
         const d = document.getElementById('display');
         d.innerHTML += `<div class="log">> ${m}</div>`;
         d.scrollTop = d.scrollHeight;
     }
-    function showBag() { alert("Çanta Menüsü Yakında!"); openMainMenu(); } // Örnek
-    function showPetMenu() { alert("Pet Menüsü Yakında!"); openMainMenu(); } // Örnek
-    function showMyMounts() { alert("Henüz binerin yok!"); showMountMenu(); } // Örnek
+    function spawnBattle() { addLog("Bir canavarla karşılaştın! (Savaş sistemi yakında...)"); }
 </script>
 </body>
 </html>
