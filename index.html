@@ -1,135 +1,127 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Metin Tabanlı RPG</title>
-  <style>
-    body {
-      background: #000;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    #game {
-      padding: 16px;
-    }
-    #text {
-      font-size: 18px;
-      margin-bottom: 20px;
-      min-height: 120px;
-    }
-    .choice {
-      display: block;
-      width: 100%;
-      margin: 8px 0;
-      padding: 12px;
-      font-size: 16px;
-      background: #222;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-    }
-    .choice:active {
-      background: #444;
-    }
-    #menu {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-    }
-    #menu button {
-      background: #333;
-      color: #fff;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="menu">
-  <button onclick="openSettings()">⚙️</button>
+<div id="main-menu">
+  <h1>METİN TABANLI RPG</h1>
+  <button onclick="startGame()">Oyunu Başlat</button>
+  <button onclick="openSettings()">Seçenekler</button>
+  <button onclick="openAbout()">Hakkında</button>
 </div>
 
-<div id="game">
-  <div id="text"></div>
-  <div id="choices"></div>
+<div id="settings-menu" class="hidden">
+  <h2>Ayarlar</h2>
+
+  <label>Dil</label>
+  <select id="language">
+    <option value="tr">Türkçe</option>
+    <option value="en">English</option>
+  </select>
+
+  <label>Ana Ses</label>
+  <input type="range" min="0" max="100" value="80" id="masterVolume">
+
+  <label>Müzik Sesi</label>
+  <input type="range" min="0" max="100" value="70" id="musicVolume">
+
+  <label>Efekt Sesi</label>
+  <input type="range" min="0" max="100" value="80" id="sfxVolume">
+
+  <label>
+    <input type="checkbox" id="vibration"> Titreşim
+  </label>
+
+  <button onclick="saveSettings()">Kaydet</button>
+  <button onclick="closeSettings()">Geri</button>
 </div>
 
-<audio id="clickSound" src="click.mp3" preload="auto"></audio>
+<div id="about-menu" class="hidden">
+  <h2>Hakkında</h2>
+  <p>Metin tabanlı hikâye odaklı RPG oyunu.</p>
+  <button onclick="closeAbout()">Geri</button>
+</div>
 
-<script>
-  let language = "tr";
-
-  const texts = {
-    tr: {
-      start: "Sisli bir ovada gözlerini açıyorsun. Rüzgar kulağına fısıldıyor.",
-      choice1: "Etrafına bak",
-      choice2: "İleri yürü",
-      end: "Bu bölgeyi tamamladın. Devamı yakında."
-    },
-    en: {
-      start: "You wake up in a foggy field. The wind whispers.",
-      choice1: "Look around",
-      choice2: "Walk forward",
-      end: "You completed this area. More is coming soon."
-    }
-  };
-
-  function playClick() {
-    document.getElementById("clickSound").play();
-  }
-
-  function renderStart() {
-    document.getElementById("text").innerText = texts[language].start;
-    const choices = document.getElementById("choices");
-    choices.innerHTML = "";
-
-    const btn1 = document.createElement("button");
-    btn1.className = "choice";
-    btn1.innerText = texts[language].choice1;
-    btn1.onclick = () => {
-      playClick();
-      endScene();
-    };
-
-    const btn2 = document.createElement("button");
-    btn2.className = "choice";
-    btn2.innerText = texts[language].choice2;
-    btn2.onclick = () => {
-      playClick();
-      endScene();
-    };
-
-    choices.appendChild(btn1);
-    choices.appendChild(btn2);
-  }
-
-  function endScene() {
-    document.getElementById("text").innerText = texts[language].end;
-    document.getElementById("choices").innerHTML = "";
-  }
-
-  function openSettings() {
-    const lang = prompt("Dil seç / Select language (tr / en):");
-    if (lang === "tr" || lang === "en") {
-      language = lang;
-      renderStart();
-    }
-  }
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const firstChoice = document.querySelector(".choice");
-      if (firstChoice) firstChoice.click();
-    }
-  });
-
-  renderStart();
-</script>
-
+<script src="main.js"></script>
 </body>
 </html>
+
+body {
+  background: #0f172a;
+  color: #e5e7eb;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  width: 80%;
+  max-width: 300px;
+  padding: 12px;
+  margin: 10px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.hidden {
+  display: none;
+}
+
+#main-menu,
+#settings-menu,
+#about-menu {
+  margin-top: 60px;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+}
+
+function startGame() {
+  alert("Oyun yakında başlayacak.");
+}
+
+function openSettings() {
+  document.getElementById("main-menu").classList.add("hidden");
+  document.getElementById("settings-menu").classList.remove("hidden");
+}
+
+function closeSettings() {
+  document.getElementById("settings-menu").classList.add("hidden");
+  document.getElementById("main-menu").classList.remove("hidden");
+}
+
+function openAbout() {
+  document.getElementById("main-menu").classList.add("hidden");
+  document.getElementById("about-menu").classList.remove("hidden");
+}
+
+function closeAbout() {
+  document.getElementById("about-menu").classList.add("hidden");
+  document.getElementById("main-menu").classList.remove("hidden");
+}
+
+function saveSettings() {
+  const settings = {
+    language: document.getElementById("language").value,
+    masterVolume: document.getElementById("masterVolume").value,
+    musicVolume: document.getElementById("musicVolume").value,
+    sfxVolume: document.getElementById("sfxVolume").value,
+    vibration: document.getElementById("vibration").checked
+  };
+  localStorage.setItem("gameSettings", JSON.stringify(settings));
+}
