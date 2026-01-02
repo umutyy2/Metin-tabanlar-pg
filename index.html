@@ -1,134 +1,70 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Metin Tabanlı RPG</title>
-<style>
-body {margin:0;font-family:Arial,sans-serif;background:#0e0e0e;color:#fff;}
-.screen {display:none;padding:20px;}
-.screen.active {display:block;}
-button {display:block;width:100%;padding:15px;margin:10px 0;font-size:16px;background:#1f1f1f;color:#fff;border:none;border-radius:6px;}
-button:active {background:#333;}
-.topbar {display:flex;justify-content:space-between;margin-bottom:20px;}
-select,input[type="range"],input[type="checkbox"]{width:100%;padding:10px;font-size:16px;margin:5px 0 15px 0;}
-label{display:block;margin-top:10px;}
-#gameMenu{position:absolute;bottom:10px;right:10px;background:#1f1f1f;padding:10px;border-radius:6px;display:none;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metin Tabanlı RPG</title>
+    <style>
+        /* CSS Özellikleri */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .screen {
+            display: none;
+            padding: 20px;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        button:active {
+            background-color: #333;
+            color: white;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #eee;
+            padding: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #gameMenu {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+    </style>
 </head>
-<body><div id="menu" class="screen active">
-  <h1 id="title">Metin Tabanlı RPG</h1>
-  <button onclick="startCharacterCreation()" id="startBtn">Oyunu Başlat</button>
-  <button onclick="openSettings()" id="settingsBtn">Seçenekler</button>
-  <button onclick="openAbout()" id="aboutBtn">Hakkında</button>
-</div><div id="characterScreen" class="screen">
-  <h2>Karakter Oluştur</h2>
-  <label>İsim:</label>
-  <input type="text" id="playerName" placeholder="İsminizi girin">
-  <label>Cinsiyet:</label>
-  <select id="playerGender">
-    <option value="male">Erkek</option>
-    <option value="female">Kadın</option>
-  </select>
-  <label>Sınıf:</label>
-  <select id="playerClass">
-    <option value="Savasci">Savaşçı</option>
-    <option value="Buyucu">Büyücü</option>
-    <option value="Sifaci">Şifacı</option>
-    <option value="Hirsiz">Hırsız</option>
-  </select>
-  <button onclick="confirmCharacter()">Başla</button>
-  <button onclick="goMenu()">Geri</button>
-</div><div id="game" class="screen">
-  <div class="topbar">
-    <button onclick="goMenu()">←</button>
-    <button onclick="openSettings()">⚙️</button>
-    <button onclick="toggleGameMenu()">📖</button>
-  </div>
-  <p id="storyText"></p>
-  <div id="gameMenu">
-    <button onclick="openInventory()">Çanta</button>
-    <button onclick="openEquipment()">Ekipman</button>
-    <button onclick="openPets()">Evcil Hayvanlar</button>
-    <button onclick="openMounts()">Binekler</button>
-    <button onclick="openSkillMenu()">Yetenekler</button>
-    <button onclick="openHeroLog()">Kahraman Günlüğü</button>
-  </div>
-  <p id="timeWeather"></p>
-</div><div id="settings" class="screen">
-  <h2 id="settingsTitle">Ayarlar</h2>
-  <label id="langLabel">Dil</label>
-  <select onchange="changeLang(this.value)">
-    <option value="tr">Türkçe</option>
-    <option value="en">English</option>
-  </select>
-  <label>Ana Ses<input type="range" id="masterVolume" min="0" max="100" value="80"></label>
-  <label>Ambiyans<input type="range" id="ambientVolume" min="0" max="100" value="70"></label>
-  <label>UI Sesleri<input type="range" id="uiVolume" min="0" max="100" value="60"></label>
-  <label>Kulaklık Modu<input type="checkbox" id="headphoneMode"></label>
-  <button onclick="saveSettings()">Kaydet</button>
-  <button onclick="goMenu()">Geri</button>
-</div><div id="about" class="screen">
-  <h2 id="aboutTitle">Hakkında</h2>
-  <p id="aboutText">Bu oyun metin tabanlı bir RPG projesidir.</p>
-  <button onclick="goMenu()">Geri</button>
-</div><script>
-let currentLang="tr";
-const texts={
-  tr:{title:"Metin Tabanlı RPG",start:"Oyunu Başlat",settings:"Seçenekler",about:"Hakkında",settingsTitle:"Ayarlar",lang:"Dil",back:"Geri",aboutText:"Bu oyun metin tabanlı bir RPG projesidir.",story:"Soğuk bir rüzgar yüzüne çarpıyor. Önünde bilinmeyen bir yol uzanıyor."},
-  en:{title:"Text Based RPG",start:"Start Game",settings:"Options",about:"About",settingsTitle:"Settings",lang:"Language",back:"Back",aboutText:"This is a text based RPG project.",story:"A cold wind hits your face. An unknown road lies ahead."}
-};
-function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
-function startCharacterCreation(){showScreen("characterScreen");}
-function openSettings(){showScreen("settings");}
-function openAbout(){showScreen("about");}
-function goMenu(){showScreen("menu");}
-function changeLang(lang){currentLang=lang;applyLang();}
-function applyLang(){const t=texts[currentLang];document.getElementById("title").innerText=t.title;document.getElementById("startBtn").innerText=t.start;document.getElementById("settingsBtn").innerText=t.settings;document.getElementById("aboutBtn").innerText=t.about;document.getElementById("settingsTitle").innerText=t.settingsTitle;document.getElementById("langLabel").innerText=t.lang;document.getElementById("aboutText").innerText=t.aboutText;document.getElementById("storyText").innerText=t.story;}
-applyLang();
+<body>
 
-const settings={masterVolume:80,ambientVolume:70,uiVolume:60,headphoneMode:false};
-document.getElementById("masterVolume").addEventListener("input",e=>settings.masterVolume=e.target.value);
-document.getElementById("ambientVolume").addEventListener("input",e=>settings.ambientVolume=e.target.value);
-document.getElementById("uiVolume").addEventListener("input",e=>settings.uiVolume=e.target.value);
-document.getElementById("headphoneMode").addEventListener("change",e=>settings.headphoneMode=e.target.checked);
-function saveSettings(){localStorage.setItem("rpgSettings",JSON.stringify(settings));alert(currentLang==="tr"?"Ayarlar kaydedildi!":"Settings saved!");}
-function loadSettings(){const s=JSON.parse(localStorage.getItem("rpgSettings"));if(s){settings.masterVolume=s.masterVolume;settings.ambientVolume=s.ambientVolume;settings.uiVolume=s.uiVolume;settings.headphoneMode=s.headphoneMode;document.getElementById("masterVolume").value=s.masterVolume;document.getElementById("ambientVolume").value=s.ambientVolume;document.getElementById("uiVolume").value=s.uiVolume;document.getElementById("headphoneMode").checked=s.headphoneMode;}}
-loadSettings();
+    <div id="menu" class="screen active">
+        <h1 id="header">Metin Tabanlı RPG</h1>
+        <button onclick="startGame()">Oyuna Başla</button>
+    </div>
 
-function playUI(action){console.log("UI Ses çalıyor:",action);}
-function playAmbient(type){console.log("Ambiyans Ses çalıyor:",type);}
-function playSkillSound(skillId){console.log("Yetenek sesi çalıyor:",skillId);}
-function playWeaponSound(weaponId){console.log("Silah sesi çalıyor:",weaponId);}
-function playMonsterSound(monsterId,direction){console.log("Canavar sesi çalıyor:",monsterId,direction);}
-function playNPCSound(npcId,action){console.log("NPC sesi çalıyor:",npcId,action);}
+    <div id="game" class="screen">
+        <div class="top-bar">
+            <span>Can: 100</span>
+            <span>Altın: 0</span>
+        </div>
+        <p>Maceraya hoş geldin!</p>
+    </div>
 
-let player={name:"",gender:null,class:null,level:1,experience:0,skills:[],unlockedMenus:{inventory:false,equipment:false,pets:false,mounts:false,heroLog:false}};
-const classes={
-  Savasci:["Normal Saldırı","Güçlü Darbe","Kalkan Savunması","Hızlı Hamle","Yerevurma","Ölümcül Vuruş","Çifte Saldırı","Savunma Düşmanı","Savaş Ruhu","Efsanevi Darbe"],
-  Buyucu:["Normal Saldırı","Ateş Topu","Buz Mızrağı","Şimşek","Rüzgar Dalgası","Büyü Kalkanı","Zihin Kontrolü","Element Patlaması","Mana Patlaması","Efsanevi Büyü"],
-  Sifaci:["Normal Saldırı","Hafif İyileştir","Güçlü İyileştir","Koruma","Can Yenileme","Grup İyileştir","Tılsım Patlaması","Enerji Dalgası","Hayat Patlaması","Efsanevi İyileştirme"],
-  Hirsiz:["Normal Saldırı","Hızlı Kes","Arkadan Vuruş","Hileli Tuzak","Gölge Adımı","Çifte Darbe","Hırsızlık Ustası","Kilit Kırma","Para Çalma","Efsanevi Hırsızlık"]
-};
-let skillsUnlockLevels=[5,10,15,20,25,30,35,40,45,50];
-function unlockSkills(level){const c=player.class;player.skills=c?classes[c].filter((s,i)=>level>=skillsUnlockLevels[i]):[];}
-
-let region={name:"Yeşil Vadi",minLevel:1,maxLevel:10,villages:["Kavak Köyü","Çınar Köyü","Ardıç Köyü"],city:"Altınşehir",npcs:[],monsters:[],quests:[]};
-
-function confirmCharacter(){player.name=document.getElementById("playerName").value||"Kahraman";player.gender=document.getElementById("playerGender").value;player.class=document.getElementById("playerClass").value;showScreen("game");startRegion();}
-function startRegion(){document.getElementById("storyText").innerText=`Burası ${region.name}. Yolculuğun başlıyor.`;generateNPCs();generateMonsters();unlockMenus();startTime();}
-function generateNPCs(){region.npcs=[];const namesMale=["Ali","Mehmet","Can","Emir"];const namesFemale=["Ayşe","Elif","Zeynep","Derya"];region.villages.forEach(v=>{for(let i=0;i<3;i++){region.npcs.push({name:namesMale[i],gender:"male",village:v});region.npcs.push({name:namesFemale[i],gender:"female",village:v});}});region.npcs.push({name:"Fatma",gender:"female",village:region.city});region.npcs.push({name:"Ahmet",gender:"male",village:region.city});}
-function generateMonsters(){region.monsters=[];for(let lvl=1;lvl<=10;lvl++){region.monsters.push({name:"Canavar"+lvl,level:lvl,dropGold:lvl*2});}}
-function unlockMenus(){if(player.level>=2)player.unlockedMenus.inventory=true;if(player.level>=3)player.unlockedMenus.equipment=true;if(player.level>=4)player.unlockedMenus.pets=true;if(player.level>=5)player.unlockedMenus.mounts=true;if(player.level>=6)player.unlockedMenus.heroLog=true;}
-function toggleGameMenu(){const menu=document.getElementById("gameMenu");menu.style.display=menu.style.display==="none"?"block":"none";}
-function openInventory(){alert("Çanta açıldı!");}
-function openEquipment(){alert("Ekipman menüsü açıldı!");}
-function openPets(){alert("Evcil Hayvanlar açıldı!");}
-function openMounts(){alert("Binekler açıldı!");}
-function openSkillMenu(){alert("Yetenekler açıldı!");}
-function openHeroLog(){alert("Kahraman Günlüğü açıldı!");}
-
-let gameTime={hour:6,day:1,month:1,year:1000,season:"İlkbahar"};
-function startTime(){setInterval(()=>{gameTime.hour++;if(gameTime.hour>=24){gameTime.hour=0;gameTime.day++;}if(gameTime.day>30){gameTime.day=1;gameTime.month++;}if(gameTime.month>12){gameTime.month=1;gameTime.year++;}updateSeason();document.getElementById("timeWeather").innerText=`Gün: ${gameTime.day}, Saat: ${gameTime.hour}:00, Mevsim: ${gameTime.season}`;},60000);}
-function updateSeason(){if(gameTime.month>=3&&gameTime.month<6)gameTime.season="İlkbahar";else if(gameTime.month>=6&&gameTime.month<9)gameTime.season="Yaz";else if(gameTime.month>=9&&gameTime.month<12)gameTime.season="Sonbahar";else gameTime.season="Kış";}
-</script></body>
+</body>
 </html>
