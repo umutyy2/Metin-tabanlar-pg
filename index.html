@@ -1,1 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Metin Tabanlı RPG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #f2f2f2;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      font-size: 18px;
+      background-color: #1f1f1f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+    }
+    button:focus {
+      outline: 3px solid #00ffcc;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1 id="gameTitle">METİN TABANLI RPG</h1>
+  <p id="gameSubtitle">Karanlık bir dünyada yolculuk başlıyor.</p>
+
+  <div id="menu">
+    <button onclick="startGame()" aria-label="Oyuna başla">Oyuna Başla</button>
+    <button onclick="openOptions()" aria-label="Seçenekler">Seçenekler</button>
+    <button onclick="openCredits()" aria-label="Hakkında">Hakkında</button>
+  </div>
+
+  <div id="options" class="hidden">
+    <h2>Seçenekler</h2>
+    <button onclick="setLanguage('tr')">Türkçe</button>
+    <button onclick="setLanguage('en')">English</button>
+    <button onclick="backToMenu()">Geri</button>
+  </div>
+
+  <div id="game" class="hidden">
+    <p id="storyText"></p>
+    <button onclick="nextText()">Devam Et</button>
+  </div>
+
+  <div id="credits" class="hidden">
+    <p>Bu oyun Umut tarafından geliştirilmektedir.</p>
+    <button onclick="backToMenu()">Geri</button>
+  </div>
+
+<script>
+  let language = "tr";
+  let storyIndex = 0;
+
+  const story = {
+    tr: [
+      "Soğuk rüzgar dağların arasından esiyor.",
+      "Uzaktan bir köyün ışıkları görünüyor.",
+      "Yolculuğun henüz başlıyor."
+    ],
+    en: [
+      "Cold winds blow through the mountains.",
+      "Lights of a village appear in the distance.",
+      "Your journey has just begun."
+    ]
+  };
+
+  function startGame() {
+    hideAll();
+    document.getElementById("game").classList.remove("hidden");
+    storyIndex = 0;
+    updateStory();
+  }
+
+  function nextText() {
+    storyIndex++;
+    if (storyIndex < story[language].length) {
+      updateStory();
+    } else {
+      document.getElementById("storyText").innerText =
+        language === "tr"
+        ? "Şimdilik bu kadar. Devamı yakında."
+        : "That's all for now. More coming soon.";
+    }
+  }
+
+  function updateStory()
